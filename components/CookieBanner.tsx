@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useEffect, useState } from "react";
 
@@ -51,7 +51,7 @@ export default function CookieBanner() {
           </div>
         )}
         <div className="mt-3 flex flex-wrap gap-2">
-          <button onClick={() => save({ analytics: true, marketing: true })} className="min-h-11 rounded-xl bg-green-700 px-5 font-semibold text-white">
+          <button onClick={() => save({ analytics: true, marketing: true })} className="min-h-11 rounded-xl bg-sky-700 px-5 font-semibold text-white">
             Принять все
           </button>
           {settings ? (

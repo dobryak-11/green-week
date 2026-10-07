@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 const DOCS: [string, string][] = [
   ["Публичная оферта", "#"],
@@ -12,7 +12,7 @@ const DOCS: [string, string][] = [
 
 export default function Footer() {
   return (
-    <footer className="bg-neutral-900 px-4 py-10 text-sm text-neutral-300">
+    <footer className="bg-sky-950 px-4 py-10 text-sm text-neutral-300">
       <div className="mx-auto grid max-w-5xl gap-8 md:grid-cols-2">
         <div>
           <div className="font-semibold text-white">ООО «[Название компании]»</div>
@@ -43,3 +43,4 @@ export default function Footer() {
     </footer>
   );
 }
+

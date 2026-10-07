@@ -1,4 +1,4 @@
-const SECTIONS = [
+﻿const SECTIONS = [
   {
     title: "Заказ и доставка",
     items: [
@@ -39,13 +39,13 @@ export default function Faq() {
       <div className="grid gap-6 md:grid-cols-2">
         {SECTIONS.map((s) => (
           <div key={s.title}>
-            <h3 className="mb-2 text-lg font-semibold text-green-800">{s.title}</h3>
+            <h3 className="mb-2 text-lg font-semibold text-sky-800">{s.title}</h3>
             <div className="space-y-2">
               {s.items.map(([q, a]) => (
-                <details key={q} className="group rounded-xl border border-green-200 bg-white p-4">
+                <details key={q} className="group rounded-xl border border-sky-200 bg-white p-4">
                   <summary className="flex min-h-6 cursor-pointer list-none items-center justify-between gap-3 font-medium">
                     {q}
-                    <span className="text-xl text-green-700 group-open:rotate-45">+</span>
+                    <span className="text-xl text-sky-700 group-open:rotate-45">+</span>
                   </summary>
                   <p className="mt-2 text-sm text-neutral-700">{a}</p>
                 </details>

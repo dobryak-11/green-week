@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useState } from "react";
 import { ACTIVITY, GOALS, calcKcal, type Goal, type Sex } from "@/lib/menu";
@@ -31,10 +31,10 @@ export default function Calculator({ goal, setGoal, onApply }: Props) {
 
   const chip = (active: boolean) =>
     "min-h-10 rounded-full border px-4 text-sm font-medium " +
-    (active ? "border-green-700 bg-green-700 text-white" : "border-neutral-300 bg-white");
+    (active ? "border-sky-700 bg-sky-700 text-white" : "border-neutral-300 bg-white");
 
   return (
-    <div className="rounded-2xl border border-green-200 bg-white p-5 text-neutral-900">
+    <div className="rounded-2xl border border-sky-200 bg-white p-5 text-neutral-900">
       <div className="grid gap-4 md:grid-cols-2">
         <div>
           <div className="text-sm font-semibold">Пол</div>
@@ -67,13 +67,13 @@ export default function Calculator({ goal, setGoal, onApply }: Props) {
         </label>
       </div>
 
-      <button onClick={run} className="mt-4 rounded-xl bg-green-700 px-6 py-3 font-semibold text-white">
+      <button onClick={run} className="mt-4 rounded-xl bg-sky-700 px-6 py-3 font-semibold text-white">
         Рассчитать и подобрать рацион
       </button>
       {error && <p role="alert" className="mt-3 text-sm text-pink-700">{error}</p>}
 
       {result && (
-        <div className="mt-4 rounded-xl bg-green-50 p-4 text-sm">
+        <div className="mt-4 rounded-xl bg-sky-50 p-4 text-sm">
           <p>Для поддержания веса вам нужно около <b>{result.need} ккал</b> в день.</p>
           <p className="mt-1">С учётом цели «{GOALS[goal].label}»: <b>{result.target} ккал</b>.</p>
           <p className="mt-1">Ближайший рацион: <b>{result.plan} ккал</b>, он уже выбран ниже. Если смените цель, нажмите «Рассчитать» ещё раз.</p>

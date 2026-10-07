@@ -1,4 +1,4 @@
-import { redirect } from "next/navigation";
+﻿import { redirect } from "next/navigation";
 import CheckoutForm from "@/components/CheckoutForm";
 import { DISCOUNT, GOALS, PRICE_PER_DAY, hasGap, parseFilters, totalPrice, type Goal } from "@/lib/menu";
 
@@ -16,7 +16,7 @@ export default async function CheckoutPage({ searchParams }: { searchParams: SP 
   const price = totalPrice(kcal, days);
 
   return (
-    <main className="min-h-screen bg-green-50 px-4 py-8 text-neutral-900">
+    <main className="min-h-screen bg-sky-50 px-4 py-8 text-neutral-900">
       <div className="mx-auto max-w-4xl">
         <CheckoutForm goal={goal} kcal={kcal} days={days} diet={filters.diet} allergens={filters.allergens} {...price} />
       </div>

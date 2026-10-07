@@ -1,6 +1,7 @@
-import Link from "next/link";
+﻿import Link from "next/link";
 import Configurator from "@/components/Configurator";
 import Faq from "@/components/Faq";
+import Logo from "@/components/Logo";
 
 const features = [
   { t: "Сбалансированное КБЖУ", d: "Каждый приём пищи рассчитан по белкам, жирам и углеводам под вашу цель." },
@@ -11,45 +12,24 @@ const features = [
 
 export default function Home() {
   return (
-    <main className="min-h-screen bg-green-50 text-neutral-900">
-      <header className="mx-auto flex max-w-5xl items-center justify-between px-4 py-4">
-        <div className="text-lg font-bold text-green-800">Зелёная неделя</div>
-        <nav className="flex gap-5 text-sm font-medium">
-          <a href="#about">О нас</a>
-          <a href="#calc">Расчёт</a>
-          <a href="#menu">Меню</a>
-          <a href="#faq">Вопросы</a>
-          <Link href="/account">Кабинет</Link>
-        </nav>
-      </header>
-
-      <section className="mx-auto max-w-5xl px-4 py-12 md:py-20">
-        <h1 className="max-w-3xl text-4xl font-bold leading-tight md:text-5xl">
-          Здоровое питание на неделю, с доставкой к утру
-        </h1>
-        <p className="mt-4 max-w-xl text-lg text-neutral-700">
-          Рассчитайте норму калорий, выберите рацион и получайте готовую еду без списков покупок и готовки.
-        </p>
-        <a href="#calc" className="mt-6 inline-block rounded-xl bg-pink-700 px-6 py-3 font-semibold text-white">
-          Подобрать рацион
-        </a>
-      </section>
-
-      <section id="about" className="mx-auto max-w-5xl scroll-mt-4 px-4 py-10">
-        <h2 className="mb-2 text-2xl font-bold">О нас</h2>
-        <p className="mb-6 max-w-2xl text-neutral-700">
-          Мы готовим сбалансированные рационы из свежих продуктов и привозим их к вашей двери.
-          Меню составляет нутрициолог, а за вкус отвечает шеф-повар.
-        </p>
-        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-          {features.map((f) => (
-            <div key={f.t} className="rounded-2xl border border-green-200 bg-white p-5">
-              <div className="font-semibold">{f.t}</div>
-              <p className="mt-2 text-sm text-neutral-700">{f.d}</p>
-            </div>
-          ))}
-        </div>
-      </section>
+    <main className="bg-white text-neutral-900">
+      <div style={{ background: "linear-gradient(to bottom, #bae6fd 0%, #e0f2fe 60%, #ffffff 100%)" }}>
+        <section id="about" className="mx-auto max-w-5xl px-4 pb-8 pt-12 md:pt-16">
+          <h1 className="text-4xl font-bold text-sky-950 md:text-5xl">О нас<Logo className="mb-4 h-16" /></h1>
+          <p className="mt-4 max-w-2xl text-lg text-sky-900">
+            Мы готовим сбалансированные рационы из свежих продуктов и привозим их к вашей двери.
+            Меню составляет нутрициолог, а за вкус отвечает шеф-повар.
+          </p>
+          <div className="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+            {features.map((f) => (
+              <div key={f.t} className="rounded-2xl border border-sky-200 bg-white/80 p-5">
+                <div className="font-semibold text-sky-950">{f.t}</div>
+                <p className="mt-2 text-sm text-neutral-700">{f.d}</p>
+              </div>
+            ))}
+          </div>
+        </section>
+      </div>
 
       <Configurator />
       <Faq />

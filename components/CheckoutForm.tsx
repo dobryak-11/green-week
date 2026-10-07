@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import Link from "next/link";
 import { useEffect, useState } from "react";
@@ -60,24 +60,24 @@ export default function CheckoutForm({ goal, kcal, days, diet, allergens, base, 
 
   if (done) {
     return (
-      <div className="mx-auto max-w-lg rounded-2xl border border-green-200 bg-white p-8 text-center">
+      <div className="mx-auto max-w-lg rounded-2xl border border-sky-200 bg-white p-8 text-center">
         <h1 className="text-2xl font-bold">Заказ принят</h1>
         <p className="mt-3 text-neutral-700">
           {f.name}, мы привезём первый набор {new Date(f.date).toLocaleDateString("ru-RU", { day: "numeric", month: "long" })}, {f.slot.toLowerCase()}.
         </p>
         <p className="mt-2 font-semibold">{fmt(total)}</p>
-        <Link href="/" className="mt-6 inline-block rounded-xl bg-green-700 px-6 py-3 font-semibold text-white">На главную</Link>
+        <Link href="/" className="mt-6 inline-block rounded-xl bg-sky-700 px-6 py-3 font-semibold text-white">На главную</Link>
       </div>
     );
   }
 
   return (
     <>
-      <Link href="/#menu" className="text-sm text-green-800 underline">← Вернуться к меню</Link>
+      <Link href="/#menu" className="text-sm text-sky-800 underline">← Вернуться к меню</Link>
       <h1 className="mb-6 mt-3 text-3xl font-bold">Оформление заказа</h1>
       <div className="grid gap-5 md:grid-cols-[1fr_300px]">
         <div className="space-y-5">
-          <section className="rounded-2xl border border-green-200 bg-white p-5">
+          <section className="rounded-2xl border border-sky-200 bg-white p-5">
             <h2 className="mb-2 text-lg font-semibold">Контакты</h2>
             <label className="mt-2 block text-sm font-semibold">Имя
               <input className={input} value={f.name} onChange={set("name")} autoComplete="name" />
@@ -90,7 +90,7 @@ export default function CheckoutForm({ goal, kcal, days, diet, allergens, base, 
             </label>{err("email")}
           </section>
 
-          <section className="rounded-2xl border border-green-200 bg-white p-5">
+          <section className="rounded-2xl border border-sky-200 bg-white p-5">
             <h2 className="mb-2 text-lg font-semibold">Адрес доставки</h2>
             <label className="mt-2 block text-sm font-semibold">Город
               <input className={input} value={f.city} onChange={set("city")} autoComplete="address-level2" />
@@ -111,7 +111,7 @@ export default function CheckoutForm({ goal, kcal, days, diet, allergens, base, 
             </label>
           </section>
 
-          <section className="rounded-2xl border border-green-200 bg-white p-5">
+          <section className="rounded-2xl border border-sky-200 bg-white p-5">
             <h2 className="mb-2 text-lg font-semibold">Доставка</h2>
             <div className="grid gap-3 sm:grid-cols-2">
               <label className="block text-sm font-semibold">Дата первой доставки
@@ -125,7 +125,7 @@ export default function CheckoutForm({ goal, kcal, days, diet, allergens, base, 
             </div>{err("date")}
           </section>
 
-          <section className="rounded-2xl border border-green-200 bg-white p-5">
+          <section className="rounded-2xl border border-sky-200 bg-white p-5">
             <h2 className="mb-2 text-lg font-semibold">Оплата</h2>
             {[
               ["online", "Картой онлайн"],
@@ -142,7 +142,7 @@ export default function CheckoutForm({ goal, kcal, days, diet, allergens, base, 
           </section>
         </div>
 
-        <aside className="h-fit rounded-2xl border border-green-200 bg-white p-5 md:sticky md:top-4">
+        <aside className="h-fit rounded-2xl border border-sky-200 bg-white p-5 md:sticky md:top-24">
           <h2 className="mb-3 text-lg font-semibold">Ваш заказ</h2>
           <div className="py-1 text-sm">{GOALS[goal].label}, {kcal} ккал</div>
            {(diet !== "any" || allergens.length > 0) && (
@@ -159,7 +159,7 @@ export default function CheckoutForm({ goal, kcal, days, diet, allergens, base, 
           <div className="mt-2 flex justify-between border-t border-neutral-200 pt-3 text-lg font-bold">
             <span>К оплате</span><span>{fmt(total)}</span>
           </div>
-          <button onClick={submit} className="mt-3 w-full rounded-xl bg-pink-700 py-3 font-semibold text-white">
+          <button onClick={submit} className="mt-3 w-full rounded-xl bg-sky-700 py-3 font-semibold text-white">
             {f.pay === "online" ? "Перейти к оплате" : "Подтвердить заказ"}
           </button>
         </aside>

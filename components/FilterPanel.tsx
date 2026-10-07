@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useEffect } from "react";
 import { ALLERGENS, DIETS, type Allergen, type Diet, type Filters } from "@/lib/menu";
@@ -65,7 +65,7 @@ export default function FilterPanel({ open, onClose, filters, setFilters }: Prop
           >
             Сбросить
           </button>
-          <button onClick={onClose} className="min-h-11 flex-1 rounded-xl bg-green-700 font-semibold text-white">
+          <button onClick={onClose} className="min-h-11 flex-1 rounded-xl bg-sky-700 font-semibold text-white">
             Показать меню
           </button>
         </div>
