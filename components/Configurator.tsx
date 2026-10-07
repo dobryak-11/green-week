@@ -3,9 +3,10 @@
 import Link from "next/link";
 import { useState } from "react";
 import Calculator from "@/components/Calculator";
+import FilterPanel from "@/components/FilterPanel";
 import {
-  DAY_OPTIONS, DISCOUNT, EXCLUSIONS, GOALS, KCALS, MEALS,
-  macros, pickDish, totalPrice, type Dish, type Exclusion, type Goal,
+  ALLERGENS, DAY_OPTIONS, DIETS, DISCOUNT, GOALS, KCALS, MEALS,
+  hasGap, macros, pickDish, totalPrice, type Dish, type Filters, type Goal,
 } from "@/lib/menu";
 
 const fmt = (n: number) => n.toLocaleString("ru-RU") + " ₽";
@@ -76,10 +77,13 @@ function DishRow({ dish, mealName, time, info }: { dish: Dish; mealName: string;
           <div className="font-semibold">{dish.name}</div>
           <p className="mt-1 text-sm text-neutral-700">{dish.desc}</p>
           <p className="mt-2 text-xs text-neutral-600"><b>Состав:</b> {dish.ingredients}</p>
+          <p className="mt-1 text-xs text-neutral-600">
+            <b>Аллергены:</b>{" "}
+            {dish.allergens.length ? dish.allergens.map((a) => ALLERGENS[a].toLowerCase()).join(", ") : "из списка фильтра не указаны"}
+          </p>
           <div className="mt-2 flex flex-wrap gap-1">
-            {dish.tags.map((t) => (
-              <span key={t} className="rounded-md bg-green-100 px-2 py-0.5 text-xs text-green-800">{EXCLUSIONS[t]}</span>
-            ))}
+            {dish.diet === "vegan" && <span className="rounded-md bg-green-100 px-2 py-0.5 text-xs text-green-800">Веганское</span>}
+            {dish.diet === "veg" && <span className="rounded-md bg-green-100 px-2 py-0.5 text-xs text-green-800">Вегетарианское</span>}
           </div>
           <p className="mt-2 text-xs text-neutral-600">{info}</p>
         </div>
@@ -92,14 +96,17 @@ export default function Configurator() {
   const [goal, setGoal] = useState<Goal>("bal");
   const [kcal, setKcal] = useState<number>(1600);
   const [days, setDays] = useState<number>(5);
-  const [excl, setExcl] = useState<Exclusion[]>([]);
+  const [filters, setFilters] = useState<Filters>({ diet: "any", allergens: [] });
+  const [filterOpen, setFilterOpen] = useState(false);
   const [day, setDay] = useState(0);
 
-  const toggle = (k: Exclusion) =>
-    setExcl((p) => (p.includes(k) ? p.filter((x) => x !== k) : [...p, k]));
   const m = macros(kcal, goal);
   const price = totalPrice(kcal, days);
-  const href = `/checkout?goal=${goal}&kcal=${kcal}&days=${days}&excl=${excl.join(",")}`;
+  const gap = hasGap(filters);
+  const count = (filters.diet !== "any" ? 1 : 0) + filters.allergens.length;
+  const href =
+    `/checkout?goal=${goal}&kcal=${kcal}&days=${days}` +
+    `&diet=${filters.diet}&allergens=${filters.allergens.join(",")}`;
 
   return (
     <>
@@ -133,16 +140,30 @@ export default function Configurator() {
                   </Chip>
                 ))}
               </Group>
-              <Group title="Без чего готовить">
-                {(Object.keys(EXCLUSIONS) as Exclusion[]).map((k) => (
-                  <Chip key={k} active={excl.includes(k)} onClick={() => toggle(k)}>{EXCLUSIONS[k]}</Chip>
-                ))}
-              </Group>
+              <div className="mt-4">
+                <div className="mb-2 text-sm font-semibold">Питание и аллергены</div>
+                <div className="flex flex-wrap items-center gap-2">
+                  <button
+                    onClick={() => setFilterOpen(true)}
+                    className="min-h-10 rounded-full border border-green-700 px-4 text-sm font-semibold text-green-800"
+                  >
+                    Фильтр{count > 0 ? ` (${count})` : ""}
+                  </button>
+                  {filters.diet !== "any" && (
+                    <span className="rounded-full bg-green-100 px-3 py-1 text-xs text-green-800">{DIETS[filters.diet]}</span>
+                  )}
+                  {filters.allergens.map((a) => (
+                    <span key={a} className="rounded-full bg-pink-100 px-3 py-1 text-xs text-pink-800">
+                      без: {ALLERGENS[a].toLowerCase()}
+                    </span>
+                  ))}
+                </div>
+              </div>
             </div>
 
             <div className="rounded-2xl border border-green-200 bg-white p-4 text-neutral-900">
               <h3 className="mb-1 text-lg font-semibold">Ваше меню</h3>
-              <p className="mb-3 text-xs text-neutral-600">Наведите курсор на блюдо, чтобы увидеть фото и состав.</p>
+              <p className="mb-3 text-xs text-neutral-600">Наведите курсор на блюдо, чтобы увидеть фото, состав и аллергены.</p>
               <div className="mb-2 flex gap-2 overflow-x-auto pb-1">
                 {Array.from({ length: days }, (_, i) => (
                   <button
@@ -158,11 +179,11 @@ export default function Configurator() {
                 ))}
               </div>
               {MEALS.map((meal, mi) => {
-                const dish = pickDish(mi, day, excl);
+                const dish = pickDish(mi, day, filters);
                 if (!dish) {
                   return (
-                    <div key={meal.name} className="border-t border-neutral-200 py-3 text-sm text-neutral-600">
-                      {meal.name}: нет подходящих блюд, уберите часть ограничений
+                    <div key={meal.name} className="border-t border-neutral-200 py-3 text-sm text-pink-700">
+                      {meal.name}: нет подходящих блюд. Уберите часть ограничений в фильтре.
                     </div>
                   );
                 }
@@ -196,15 +217,25 @@ export default function Configurator() {
             <div className="mt-2 flex justify-between border-t border-neutral-200 pt-3 text-lg font-bold">
               <span>К оплате</span><span>{fmt(price.total)}</span>
             </div>
-            <Link
-              href={href}
-              className="mt-3 block w-full rounded-xl bg-pink-700 py-3 text-center font-semibold text-white"
-            >
-              Оформить заказ
-            </Link>
+            {gap ? (
+              <>
+                <span aria-disabled="true" className="mt-3 block w-full rounded-xl bg-neutral-300 py-3 text-center font-semibold text-neutral-600">
+                  Оформить заказ
+                </span>
+                <p className="mt-2 text-xs text-pink-700">
+                  Для этих ограничений нет блюд на все приёмы пищи. Уберите часть фильтров.
+                </p>
+              </>
+            ) : (
+              <Link href={href} className="mt-3 block w-full rounded-xl bg-pink-700 py-3 text-center font-semibold text-white">
+                Оформить заказ
+              </Link>
+            )}
           </aside>
         </div>
       </section>
+
+      <FilterPanel open={filterOpen} onClose={() => setFilterOpen(false)} filters={filters} setFilters={setFilters} />
     </>
   );
 }

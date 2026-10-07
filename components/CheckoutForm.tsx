@@ -2,10 +2,10 @@
 
 import Link from "next/link";
 import { useEffect, useState } from "react";
-import { EXCLUSIONS, GOALS, type Exclusion, type Goal } from "@/lib/menu";
+import { ALLERGENS, DIETS, GOALS, type Allergen, type Diet, type Goal } from "@/lib/menu";
+import { saveOrder } from "@/lib/orders";
 
-type Props = { goal: Goal; kcal: number; days: number; excl: Exclusion[]; base: number; discount: number; total: number };
-
+type Props = { goal: Goal; kcal: number; days: number; diet: Diet; allergens: Allergen[]; base: number; discount: number; total: number };
 const fmt = (n: number) => n.toLocaleString("ru-RU") + " ₽";
 const SLOTS = ["Накануне, 18:00–20:00", "Утром, 06:00–08:00", "Утром, 08:00–10:00"];
 const input = "mt-1 w-full rounded-lg border border-neutral-300 bg-white px-3 py-2 text-base";
@@ -13,7 +13,7 @@ const input = "mt-1 w-full rounded-lg border border-neutral-300 bg-white px-3 py
 const localIso = (d: Date) =>
   [d.getFullYear(), String(d.getMonth() + 1).padStart(2, "0"), String(d.getDate()).padStart(2, "0")].join("-");
 
-export default function CheckoutForm({ goal, kcal, days, excl, base, discount, total }: Props) {
+export default function CheckoutForm({ goal, kcal, days, diet, allergens, base, discount, total }: Props) {
   const [f, setF] = useState({
     name: "", phone: "", email: "", city: "", address: "", apt: "", floor: "",
     comment: "", date: "", slot: SLOTS[0], pay: "online",
@@ -43,6 +43,14 @@ export default function CheckoutForm({ goal, kcal, days, excl, base, discount, t
     if (!f.date) e.date = "Выберите дату первой доставки";
     setErrors(e);
     if (Object.keys(e).length) return;
+    saveOrder({
+      id: "GW-" + Date.now().toString().slice(-6),
+      createdAt: new Date().toISOString(),
+      status: "Принят",
+      goal, kcal, days, diet, allergens, total,
+      firstDelivery: f.date, slot: f.slot, city: f.city, address: f.address,
+      name: f.name, phone: f.phone, email: f.email,
+    });
     // Здесь позже будет отправка заказа на сервер и переход к оплате
     setDone(true);
     window.scrollTo({ top: 0 });
@@ -137,7 +145,14 @@ export default function CheckoutForm({ goal, kcal, days, excl, base, discount, t
         <aside className="h-fit rounded-2xl border border-green-200 bg-white p-5 md:sticky md:top-4">
           <h2 className="mb-3 text-lg font-semibold">Ваш заказ</h2>
           <div className="py-1 text-sm">{GOALS[goal].label}, {kcal} ккал</div>
-          {excl.length > 0 && <div className="py-1 text-sm text-neutral-600">{excl.map((x) => EXCLUSIONS[x]).join(", ")}</div>}
+           {(diet !== "any" || allergens.length > 0) && (
+            <div className="py-1 text-sm text-neutral-600">
+              {[
+                diet !== "any" ? DIETS[diet] : null,
+                allergens.length ? "Без: " + allergens.map((a) => ALLERGENS[a].toLowerCase()).join(", ") : null,
+              ].filter(Boolean).join(". ")}
+            </div>
+          )}
           <div className="flex justify-between py-1 text-sm"><span>{days} дней</span><span>{fmt(base)}</span></div>
           {discount > 0 && <div className="flex justify-between py-1 text-sm"><span>Скидка</span><span>−{fmt(discount)}</span></div>}
           <div className="flex justify-between py-1 text-sm"><span>Доставка</span><span>0 ₽</span></div>

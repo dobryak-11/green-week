@@ -1,9 +1,11 @@
+import Link from "next/link";
 import Configurator from "@/components/Configurator";
+import Faq from "@/components/Faq";
 
 const features = [
   { t: "Сбалансированное КБЖУ", d: "Каждый приём пищи рассчитан по белкам, жирам и углеводам под вашу цель." },
   { t: "Свежие продукты", d: "Готовим в день доставки из свежих ингредиентов, без лишнего сахара." },
-  { t: "Доставка к утру", d: "Привозим рацион вечером накануне или рано утром, в удобное вам время." },
+  { t: "Учёт аллергенов", d: "Фильтр меню по веганскому питанию и 10 популярным аллергенам." },
   { t: "Гибкая подписка", d: "Можно пропустить день или поставить заказ на паузу." },
 ];
 
@@ -16,6 +18,8 @@ export default function Home() {
           <a href="#about">О нас</a>
           <a href="#calc">Расчёт</a>
           <a href="#menu">Меню</a>
+          <a href="#faq">Вопросы</a>
+          <Link href="/account">Кабинет</Link>
         </nav>
       </header>
 
@@ -48,6 +52,7 @@ export default function Home() {
       </section>
 
       <Configurator />
+      <Faq />
     </main>
   );
 }
