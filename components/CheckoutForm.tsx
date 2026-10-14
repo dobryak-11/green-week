@@ -2,10 +2,13 @@
 
 import Link from "next/link";
 import { useEffect, useState } from "react";
+import { useAuth } from "@/components/AuthProvider";
+import LoginForm from "@/components/LoginForm";
 import { ALLERGENS, DIETS, GOALS, type Allergen, type Diet, type Goal } from "@/lib/menu";
 import { saveOrder } from "@/lib/orders";
 
 type Props = { goal: Goal; kcal: number; days: number; diet: Diet; allergens: Allergen[]; base: number; discount: number; total: number };
+
 const fmt = (n: number) => n.toLocaleString("ru-RU") + " ₽";
 const SLOTS = ["Накануне, 18:00–20:00", "Утром, 06:00–08:00", "Утром, 08:00–10:00"];
 const input = "mt-1 w-full rounded-lg border border-neutral-300 bg-white px-3 py-2 text-base";
@@ -14,12 +17,15 @@ const localIso = (d: Date) =>
   [d.getFullYear(), String(d.getMonth() + 1).padStart(2, "0"), String(d.getDate()).padStart(2, "0")].join("-");
 
 export default function CheckoutForm({ goal, kcal, days, diet, allergens, base, discount, total }: Props) {
+  const { user, loading } = useAuth();
   const [f, setF] = useState({
     name: "", phone: "", email: "", city: "", address: "", apt: "", floor: "",
     comment: "", date: "", slot: SLOTS[0], pay: "online",
   });
   const [minDate, setMinDate] = useState("");
   const [errors, setErrors] = useState<Record<string, string>>({});
+  const [saving, setSaving] = useState(false);
+  const [saveError, setSaveError] = useState("");
   const [done, setDone] = useState(false);
 
   useEffect(() => {
@@ -30,10 +36,14 @@ export default function CheckoutForm({ goal, kcal, days, diet, allergens, base, 
     setF((s) => ({ ...s, date: s.date || iso }));
   }, []);
 
+  useEffect(() => {
+    if (user?.email) setF((s) => ({ ...s, email: s.email || user.email! }));
+  }, [user]);
+
   const set = (k: keyof typeof f) => (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) =>
     setF((s) => ({ ...s, [k]: e.target.value }));
 
-  const submit = () => {
+  const submit = async () => {
     const e: Record<string, string> = {};
     if (f.name.trim().length < 2) e.name = "Укажите имя";
     if (f.phone.replace(/\D/g, "").length < 10) e.phone = "Укажите телефон полностью";
@@ -43,17 +53,23 @@ export default function CheckoutForm({ goal, kcal, days, diet, allergens, base, 
     if (!f.date) e.date = "Выберите дату первой доставки";
     setErrors(e);
     if (Object.keys(e).length) return;
-    saveOrder({
-      id: "GW-" + Date.now().toString().slice(-6),
-      createdAt: new Date().toISOString(),
-      status: "Принят",
-      goal, kcal, days, diet, allergens, total,
-      firstDelivery: f.date, slot: f.slot, city: f.city, address: f.address,
-      name: f.name, phone: f.phone, email: f.email,
-    });
-    // Здесь позже будет отправка заказа на сервер и переход к оплате
-    setDone(true);
-    window.scrollTo({ top: 0 });
+
+    setSaving(true);
+    setSaveError("");
+    try {
+      await saveOrder({
+        goal, kcal, days, diet, allergens, total,
+        first_delivery: f.date, slot: f.slot,
+        name: f.name.trim(), phone: f.phone.trim(), email: f.email.trim(),
+        city: f.city.trim(), address: f.address.trim(),
+        apt: f.apt.trim(), floor: f.floor.trim(), comment: f.comment.trim(), pay: f.pay,
+      });
+      setDone(true);
+      window.scrollTo({ top: 0 });
+    } catch {
+      setSaveError("Не удалось сохранить заказ. Попробуйте ещё раз.");
+    }
+    setSaving(false);
   };
 
   const err = (k: string) => errors[k] && <p role="alert" className="mt-1 text-sm text-pink-700">{errors[k]}</p>;
@@ -66,7 +82,26 @@ export default function CheckoutForm({ goal, kcal, days, diet, allergens, base, 
           {f.name}, мы привезём первый набор {new Date(f.date).toLocaleDateString("ru-RU", { day: "numeric", month: "long" })}, {f.slot.toLowerCase()}.
         </p>
         <p className="mt-2 font-semibold">{fmt(total)}</p>
-        <Link href="/" className="mt-6 inline-block rounded-xl bg-sky-700 px-6 py-3 font-semibold text-white">На главную</Link>
+        {f.pay === "online" && (
+          <p className="mt-2 text-sm text-neutral-600">Онлайн-оплата пока не подключена, оплатите заказ при получении.</p>
+        )}
+        <div className="mt-6 flex justify-center gap-3">
+          <Link href="/account" className="rounded-xl bg-sky-700 px-6 py-3 font-semibold text-white">Мои заказы</Link>
+          <Link href="/" className="rounded-xl border border-sky-700 px-6 py-3 font-semibold text-sky-800">На главную</Link>
+        </div>
+      </div>
+    );
+  }
+
+  if (loading) return <p className="text-neutral-600">Загрузка…</p>;
+
+  if (!user) {
+    return (
+      <div className="mx-auto max-w-lg rounded-2xl border border-sky-200 bg-white p-6">
+        <Link href="/#menu" className="text-sm text-sky-800 underline">← Вернуться к меню</Link>
+        <h1 className="mb-1 mt-3 text-2xl font-bold">Войдите, чтобы оформить заказ</h1>
+        <p className="mb-4 text-sm text-neutral-600">Ваш рацион сохранён, после входа вы вернётесь к оформлению.</p>
+        <LoginForm />
       </div>
     );
   }
@@ -137,7 +172,7 @@ export default function CheckoutForm({ goal, kcal, days, diet, allergens, base, 
               </label>
             ))}
             <p className="mt-2 text-xs text-neutral-600">
-              Данные карты вы введёте на защищённой странице платёжного сервиса, мы их не получаем и не храним.
+              Данные карты вводятся на защищённой странице платёжного сервиса, мы их не получаем и не храним.
             </p>
           </section>
         </div>
@@ -145,7 +180,7 @@ export default function CheckoutForm({ goal, kcal, days, diet, allergens, base, 
         <aside className="h-fit rounded-2xl border border-sky-200 bg-white p-5 md:sticky md:top-24">
           <h2 className="mb-3 text-lg font-semibold">Ваш заказ</h2>
           <div className="py-1 text-sm">{GOALS[goal].label}, {kcal} ккал</div>
-           {(diet !== "any" || allergens.length > 0) && (
+          {(diet !== "any" || allergens.length > 0) && (
             <div className="py-1 text-sm text-neutral-600">
               {[
                 diet !== "any" ? DIETS[diet] : null,
@@ -159,9 +194,10 @@ export default function CheckoutForm({ goal, kcal, days, diet, allergens, base, 
           <div className="mt-2 flex justify-between border-t border-neutral-200 pt-3 text-lg font-bold">
             <span>К оплате</span><span>{fmt(total)}</span>
           </div>
-          <button onClick={submit} className="mt-3 w-full rounded-xl bg-sky-700 py-3 font-semibold text-white">
-            {f.pay === "online" ? "Перейти к оплате" : "Подтвердить заказ"}
+          <button onClick={submit} disabled={saving} className="mt-3 w-full rounded-xl bg-sky-700 py-3 font-semibold text-white disabled:opacity-60">
+            {saving ? "Сохраняем…" : "Подтвердить заказ"}
           </button>
+          {saveError && <p role="alert" className="mt-2 text-sm text-pink-700">{saveError}</p>}
         </aside>
       </div>
     </>

@@ -1,7 +1,5 @@
-﻿import Link from "next/link";
-import Configurator from "@/components/Configurator";
-import Faq from "@/components/Faq";
-import Logo from "@/components/Logo";
+﻿import Configurator from "@/components/Configurator";
+import Packaging from "@/components/Packaging";
 
 const features = [
   { t: "Сбалансированное КБЖУ", d: "Каждый приём пищи рассчитан по белкам, жирам и углеводам под вашу цель." },
@@ -14,8 +12,8 @@ export default function Home() {
   return (
     <main className="bg-white text-neutral-900">
       <div style={{ background: "linear-gradient(to bottom, #bae6fd 0%, #e0f2fe 60%, #ffffff 100%)" }}>
-        <section id="about" className="mx-auto max-w-5xl px-4 pb-8 pt-12 md:pt-16">
-          <h1 className="text-4xl font-bold text-sky-950 md:text-5xl">О нас<Logo className="mb-4 h-16" /></h1>
+        <section id="about" className="mx-auto max-w-5xl scroll-mt-20 px-4 pb-8 pt-12 md:pt-16">
+          <h1 className="text-4xl font-bold text-sky-950 md:text-5xl">О нас</h1>
           <p className="mt-4 max-w-2xl text-lg text-sky-900">
             Мы готовим сбалансированные рационы из свежих продуктов и привозим их к вашей двери.
             Меню составляет нутрициолог, а за вкус отвечает шеф-повар.
@@ -31,8 +29,8 @@ export default function Home() {
         </section>
       </div>
 
+      <Packaging />
       <Configurator />
-      <Faq />
     </main>
   );
 }
