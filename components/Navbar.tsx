@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useAuth } from "@/components/AuthProvider";
 import Logo from "@/components/Logo";
 
@@ -15,7 +15,7 @@ const LINKS = [
 ];
 const SCROLL_IDS = ["about", "packaging", "calc", "menu"];
 
-const pill = "rounded-full px-4 py-2 text-sm font-semibold transition-colors";
+const pill = "rounded-full px-4 py-2 text-sm font-semibold transition";
 
 export default function Navbar() {
   const pathname = usePathname();
@@ -23,6 +23,7 @@ export default function Navbar() {
   const home = pathname === "/";
   const [open, setOpen] = useState(false);
   const [active, setActive] = useState("");
+  const bar = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     if (!home) {
@@ -38,14 +39,35 @@ export default function Navbar() {
     return () => io.disconnect();
   }, [home]);
 
+  useEffect(() => {
+    let raf = 0;
+    const update = () => {
+      raf = 0;
+      const h = document.documentElement.scrollHeight - window.innerHeight;
+      const p = h > 0 ? window.scrollY / h : 0;
+      if (bar.current) bar.current.style.transform = `scaleX(${p})`;
+    };
+    const onScroll = () => {
+      if (!raf) raf = requestAnimationFrame(update);
+    };
+    update();
+    window.addEventListener("scroll", onScroll, { passive: true });
+    window.addEventListener("resize", onScroll);
+    return () => {
+      window.removeEventListener("scroll", onScroll);
+      window.removeEventListener("resize", onScroll);
+      if (raf) cancelAnimationFrame(raf);
+    };
+  }, [pathname]);
+
   const isOn = (id: string) => (id === "faq" ? pathname === "/faq" : home && active === id);
   const linkClass = (on: boolean) =>
-    `${pill} ${on ? "bg-sky-300 text-sky-950" : "bg-white text-sky-950 hover:bg-sky-100"}`;
-  const cabinet = `${pill} bg-sky-400 text-sky-950 hover:bg-sky-300`;
+    `${pill} ${on ? "bg-orange-400 text-[#0B1B3A]" : "bg-white text-[#0B1B3A] hover:bg-orange-100"}`;
+  const cabinet = `${pill} bg-sky-400 text-[#0B1B3A] hover:bg-sky-300`;
   const cabinetLabel = user ? "Кабинет" : "Войти";
 
   return (
-    <header className="sticky top-0 z-40 border-b border-sky-900 bg-sky-950">
+    <header className="sticky top-0 z-40 bg-[#0B1B3A]">
       <div className="mx-auto flex max-w-5xl items-center justify-between gap-10 px-4 py-3">
         <Link href="/" aria-label="На главную">
           <Logo className="h-10" dark />
@@ -69,13 +91,19 @@ export default function Navbar() {
       </div>
 
       {open && (
-        <nav className="flex flex-col gap-2 border-t border-sky-900 px-4 pb-4 pt-3 md:hidden" aria-label="Мобильное меню">
+        <nav className="flex flex-col gap-2 border-t border-white/10 px-4 pb-4 pt-3 md:hidden" aria-label="Мобильное меню">
           {LINKS.map((l) => (
             <Link key={l.id} href={l.href} onClick={() => setOpen(false)} className={linkClass(isOn(l.id))}>{l.label}</Link>
           ))}
           <Link href="/account" onClick={() => setOpen(false)} className={cabinet}>{cabinetLabel}</Link>
         </nav>
       )}
+
+      <div
+        ref={bar}
+        className="h-[3px] origin-left bg-gradient-to-r from-orange-400 via-amber-300 to-lime-300"
+        style={{ transform: "scaleX(0)" }}
+      />
     </header>
   );
 }

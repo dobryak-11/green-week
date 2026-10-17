@@ -1,16 +1,32 @@
 ﻿"use client";
 
-import Link from "next/link";
 import { useEffect, useState } from "react";
+import AddressTab from "@/components/account/AddressTab";
+import OrdersTab from "@/components/account/OrdersTab";
+import PaymentTab from "@/components/account/PaymentTab";
+import ReviewsTab from "@/components/account/ReviewsTab";
+import SupportTab from "@/components/account/SupportTab";
+import WeightTab from "@/components/account/WeightTab";
 import { useAuth } from "@/components/AuthProvider";
 import LoginForm from "@/components/LoginForm";
-import { ALLERGENS, DIETS, GOALS } from "@/lib/menu";
 import { loadOrders, type SavedOrder } from "@/lib/orders";
+import PublicReviews from "@/components/PublicReviews";
+
+const TABS = [
+  ["orders", "Заказы"],
+  ["weight", "Вес"],
+  ["addresses", "Адреса"],
+  ["payment", "Оплата"],
+  ["reviews", "Отзывы"],
+  ["support", "Поддержка"],
+] as const;
+type Tab = (typeof TABS)[number][0];
 
 const fmt = (n: number) => n.toLocaleString("ru-RU") + " ₽";
 
 export default function AccountPage() {
   const { user, loading, signOut } = useAuth();
+  const [tab, setTab] = useState<Tab>("orders");
   const [orders, setOrders] = useState<SavedOrder[] | null>(null);
   const [error, setError] = useState("");
 
@@ -20,73 +36,62 @@ export default function AccountPage() {
   }, [user]);
 
   const last = orders?.[0];
+  const spent = orders?.reduce((s, o) => s + o.total, 0) ?? 0;
 
   return (
-    <main className="min-h-screen bg-sky-50 px-4 py-8 text-neutral-900">
+    <main className="min-h-screen px-4 py-10">
       <div className="mx-auto max-w-4xl">
-        <h1 className="mb-4 text-3xl font-bold">Личный кабинет</h1>
+        <h1 className="mb-6 text-3xl font-bold md:text-4xl">Личный кабинет</h1>
 
         {loading ? (
-          <p className="text-neutral-600">Загрузка…</p>
+          <p className="text-[#5B6785]">Загрузка…</p>
         ) : !user ? (
-          <section className="rounded-2xl border border-sky-200 bg-white p-6">
+          <section className="rounded-3xl border-2 border-[#F0E4D3] bg-white p-6">
             <h2 className="mb-3 text-lg font-semibold">Вход или регистрация</h2>
             <LoginForm />
           </section>
         ) : (
           <>
-            <section className="mb-5 flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-sky-200 bg-white p-5">
-              <div>
-                <div className="text-sm text-neutral-600">Вы вошли как</div>
-                <div className="font-semibold">{user.email}</div>
-                {last && <div className="mt-1 text-sm text-neutral-600">{last.name} · {last.phone} · {last.city}, {last.address}</div>}
+            <section className="mb-5 flex flex-wrap items-center gap-4 rounded-3xl bg-[#0B1B3A] p-5 text-white">
+              <div className="flex h-14 w-14 items-center justify-center rounded-full bg-orange-400 font-display text-2xl font-bold text-[#0B1B3A]">
+                {(user.email ?? "?")[0].toUpperCase()}
               </div>
-              <button onClick={signOut} className="min-h-10 rounded-xl border border-sky-700 px-4 text-sm font-semibold text-sky-800">
+              <div className="min-w-0 flex-1">
+                <div className="truncate font-semibold">{last?.name ?? user.email}</div>
+                <div className="truncate text-sm text-sky-200">{user.email}</div>
+              </div>
+              <div className="flex gap-6 text-sm">
+                <div><div className="font-display text-xl font-bold">{orders?.length ?? 0}</div><div className="text-sky-200">заказов</div></div>
+                <div><div className="font-display text-xl font-bold">{fmt(spent)}</div><div className="text-sky-200">на сумму</div></div>
+              </div>
+              <button onClick={signOut} className="min-h-11 rounded-full border-2 border-white/40 px-5 text-sm font-semibold transition hover:bg-white hover:text-[#0B1B3A]">
                 Выйти
               </button>
             </section>
 
-            <h2 className="mb-3 text-lg font-semibold">История заказов</h2>
-            {error && <p role="alert" className="text-pink-700">{error}</p>}
-            {orders === null && !error ? (
-              <p className="text-neutral-600">Загрузка…</p>
-            ) : orders && orders.length === 0 ? (
-              <div className="rounded-2xl border border-sky-200 bg-white p-6 text-center">
-                <p className="text-neutral-700">Заказов пока нет.</p>
-                <Link href="/#calc" className="mt-3 inline-block rounded-xl bg-sky-700 px-5 py-2 font-semibold text-white">
-                  Подобрать рацион
-                </Link>
-              </div>
-            ) : (
-              <div className="space-y-3">
-                {orders?.map((o) => (
-                  <article key={o.id} className="rounded-2xl border border-sky-200 bg-white p-5">
-                    <div className="flex flex-wrap items-center justify-between gap-2">
-                      <div className="font-semibold">Заказ № {o.id.slice(0, 8).toUpperCase()}</div>
-                      <span className="rounded-full bg-sky-100 px-3 py-1 text-xs text-sky-800">{o.status}</span>
-                    </div>
-                    <p className="mt-1 text-sm text-neutral-600">
-                      от {new Date(o.created_at).toLocaleDateString("ru-RU")} · доставка с{" "}
-                      {new Date(o.first_delivery).toLocaleDateString("ru-RU", { day: "numeric", month: "long" })}, {o.slot.toLowerCase()}
-                    </p>
-                    <p className="mt-2 text-sm">
-                      {GOALS[o.goal].label}, {o.kcal} ккал, {o.days} дней
-                      {o.diet !== "any" && ` · ${DIETS[o.diet].toLowerCase()}`}
-                      {o.allergens.length > 0 && ` · без: ${o.allergens.map((a) => ALLERGENS[a].toLowerCase()).join(", ")}`}
-                    </p>
-                    <div className="mt-3 flex items-center justify-between">
-                      <span className="font-bold">{fmt(o.total)}</span>
-                      <Link
-                        href={`/checkout?goal=${o.goal}&kcal=${o.kcal}&days=${o.days}&diet=${o.diet}&allergens=${o.allergens.join(",")}`}
-                        className="min-h-10 rounded-xl border border-sky-700 px-4 py-2 text-sm font-semibold text-sky-800"
-                      >
-                        Повторить заказ
-                      </Link>
-                    </div>
-                  </article>
-                ))}
-              </div>
-            )}
+            <div className="mb-6 flex gap-2 overflow-x-auto pb-1" role="tablist">
+              {TABS.map(([id, label]) => (
+                <button
+                  key={id}
+                  role="tab"
+                  aria-selected={tab === id}
+                  onClick={() => setTab(id)}
+                  className={
+                    "min-h-11 shrink-0 rounded-full border-2 px-5 text-sm font-bold transition " +
+                    (tab === id ? "border-orange-400 bg-orange-400 text-[#0B1B3A]" : "border-[#F0E4D3] bg-white hover:border-orange-300")
+                  }
+                >
+                  {label}
+                </button>
+              ))}
+            </div>
+
+            {tab === "orders" && <OrdersTab orders={orders} error={error} />}
+            {tab === "weight" && <WeightTab />}
+            {tab === "addresses" && <AddressTab />}
+            {tab === "payment" && <PaymentTab />}
+            {tab === "reviews" && <ReviewsTab orders={orders} />}
+            {tab === "support" && <SupportTab />}
           </>
         )}
       </div>

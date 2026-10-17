@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { supabase } from "@/lib/supabase";
+import DevLogin from "@/components/DevLogin";
 
 const input = "mt-1 w-full rounded-lg border border-neutral-300 bg-white px-3 py-2 text-base";
 
@@ -32,7 +33,7 @@ export default function LoginForm({ onDone }: { onDone?: () => void }) {
     });
     setBusy(false);
     if (error) {
-      setError("Не удалось отправить код. Подождите минуту и попробуйте снова.");
+      setError("Не удалось отправить код: " + error.message);
       return;
     }
     setStep("code");
@@ -93,6 +94,7 @@ export default function LoginForm({ onDone }: { onDone?: () => void }) {
         </form>
       )}
       {error && <p role="alert" className="mt-3 text-sm text-pink-700">{error}</p>}
+      <DevLogin onDone={onDone} />
     </div>
   );
 }
