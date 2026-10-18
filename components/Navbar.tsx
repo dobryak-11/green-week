@@ -19,7 +19,7 @@ const pill = "rounded-full px-4 py-2 text-sm font-semibold transition";
 
 export default function Navbar() {
   const pathname = usePathname();
-  const { user } = useAuth();
+  const { user, isAdmin } = useAuth();
   const home = pathname === "/";
   const [open, setOpen] = useState(false);
   const [active, setActive] = useState("");
@@ -77,6 +77,7 @@ export default function Navbar() {
           {LINKS.map((l) => (
             <Link key={l.id} href={l.href} className={linkClass(isOn(l.id))}>{l.label}</Link>
           ))}
+          {isAdmin && <Link href="/admin" className={linkClass(pathname.startsWith("/admin"))}>Админка</Link>}
           <Link href="/account" className={`${cabinet} ml-2`}>{cabinetLabel}</Link>
         </nav>
 
@@ -95,6 +96,7 @@ export default function Navbar() {
           {LINKS.map((l) => (
             <Link key={l.id} href={l.href} onClick={() => setOpen(false)} className={linkClass(isOn(l.id))}>{l.label}</Link>
           ))}
+          {isAdmin && <Link href="/admin" onClick={() => setOpen(false)} className={linkClass(pathname.startsWith("/admin"))}>Админка</Link>}
           <Link href="/account" onClick={() => setOpen(false)} className={cabinet}>{cabinetLabel}</Link>
         </nav>
       )}

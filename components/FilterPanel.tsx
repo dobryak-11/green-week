@@ -2,11 +2,13 @@
 
 import { useEffect, useRef } from "react";
 import { ALLERGENS, DIETS, hasGap, type Allergen, type Diet, type Filters } from "@/lib/menu";
+import { useMenu } from "@/components/MenuProvider";
 
 type Props = { open: boolean; onClose: () => void; filters: Filters; setFilters: (f: Filters) => void };
 
 export default function FilterPanel({ open, onClose, filters, setFilters }: Props) {
   const box = useRef<HTMLDivElement>(null);
+  const { menu } = useMenu();
 
   useEffect(() => {
     if (!open) return;
@@ -32,7 +34,7 @@ export default function FilterPanel({ open, onClose, filters, setFilters }: Prop
     });
 
   const count = (filters.diet !== "any" ? 1 : 0) + filters.allergens.length;
-  const gap = hasGap(filters);
+  const gap = hasGap(menu, filters);
 
   return (
     <div

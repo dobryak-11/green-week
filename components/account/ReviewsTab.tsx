@@ -4,6 +4,7 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import { useAuth } from "@/components/AuthProvider";
 import { dishesOfOrder, loadMyReviews, saveReview, type Review } from "@/lib/account";
 import type { SavedOrder } from "@/lib/orders";
+import { useMenu } from "@/components/MenuProvider";
 
 const DAY = 86400000;
 const openAt = (o: SavedOrder) => new Date(o.first_delivery + "T12:00:00").getTime() + 7 * DAY;
@@ -12,6 +13,7 @@ const field =
 
 export default function ReviewsTab({ orders }: { orders: SavedOrder[] | null }) {
   const { user } = useAuth();
+  const { menu } = useMenu();
   const [mine, setMine] = useState<Review[]>([]);
   const [orderId, setOrderId] = useState("");
   const [dishId, setDishId] = useState("");
@@ -32,8 +34,8 @@ export default function ReviewsTab({ orders }: { orders: SavedOrder[] | null }) 
   const dishes = useMemo(() => {
     if (!order) return [];
     const done = new Set(mine.filter((r) => r.order_id === order.id).map((r) => r.dish_id));
-    return dishesOfOrder(order).filter((d) => !done.has(d.id));
-  }, [order, mine]);
+    return dishesOfOrder(menu, order).filter((d) => !done.has(d.id));
+  }, [order, mine, menu]);
   const dish = dishes.find((d) => d.id === dishId) ?? dishes[0];
 
   const send = async () => {

@@ -5,6 +5,7 @@ import AuthProvider from "@/components/AuthProvider";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import CookieBanner from "@/components/CookieBanner";
+import MenuProvider from "@/components/MenuProvider";
 
 const body = Onest({ subsets: ["latin", "cyrillic"], variable: "--font-body", display: "swap" });
 const display = Unbounded({ subsets: ["latin", "cyrillic"], variable: "--font-display", display: "swap" });
@@ -19,11 +20,13 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
     <html lang="ru" className={`${body.variable} ${display.variable}`}>
       <body className="antialiased">
         <AuthProvider>
-          <Navbar />
-          {children}
-          <Footer />
-          <CookieBanner />
-        </AuthProvider>
+  <MenuProvider>
+    <Navbar />
+    {children}
+    <Footer />
+    <CookieBanner />
+  </MenuProvider>
+</AuthProvider>
       </body>
     </html>
   );

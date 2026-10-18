@@ -1,7 +1,8 @@
 ﻿"use client";
 
 import { useMemo, useState } from "react";
-import { ACTIVITY, GOALS, calcKcal, macros, type Goal, type Sex } from "@/lib/menu";
+import { useMenu } from "@/components/MenuProvider";
+import { ACTIVITY, GOALS, calcKcal, kcalOptions, macros, type Goal, type Sex } from "@/lib/menu";
 
 type Props = { goal: Goal; setGoal: (g: Goal) => void; onApply: (kcal: number) => void };
 
@@ -35,9 +36,10 @@ export default function Calculator({ goal, setGoal, onApply }: Props) {
 
   const a = +age, h = +height, w = +weight;
   const valid = a >= 18 && a <= 80 && h >= 140 && h <= 220 && w >= 40 && w <= 250;
+    const { menu } = useMenu();
   const r = useMemo(
-    () => (valid ? calcKcal(sex, a, h, w, ACTIVITY[act].k, goal) : null),
-    [valid, sex, a, h, w, act, goal]
+    () => (valid ? calcKcal(sex, a, h, w, ACTIVITY[act].k, goal, kcalOptions(menu)) : null),
+    [valid, sex, a, h, w, act, goal, menu]
   );
   const m = r ? macros(r.target, goal) : null;
   const split = GOALS[goal].split;

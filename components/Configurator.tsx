@@ -4,13 +4,15 @@ import Link from "next/link";
 import { useState } from "react";
 import Calculator from "@/components/Calculator";
 import FilterPanel from "@/components/FilterPanel";
+import { useMenu } from "@/components/MenuProvider";
 import Reveal from "@/components/Reveal";
 import {
-  ALLERGENS, DAY_OPTIONS, DIETS, DISCOUNT, GOALS, KCALS, MEALS, PRICE_PER_DAY,
-  hasGap, macros, pickDish, totalPrice, type Dish, type Filters, type Goal,
+  ALLERGENS, DIETS, GOALS, MEALS, dayOptions, hasGap, kcalOptions, macros, pickDish, totalPrice,
+  type Dish, type Filters, type Goal,
 } from "@/lib/menu";
 
 const fmt = (n: number) => n.toLocaleString("ru-RU") + " ₽";
+const pct = (r: number) => Math.round(r * 100);
 const MEAL_COLORS = ["bg-amber-300", "bg-orange-400", "bg-lime-300", "bg-sky-300"];
 const MEAL_TONES = ["from-amber-200 to-amber-400", "from-orange-200 to-orange-400", "from-lime-200 to-lime-400", "from-sky-200 to-sky-400"];
 const EXTS = ["jpg", "png", "webp"];
@@ -44,8 +46,9 @@ function Dot({ c }: { c: string }) {
 }
 
 function DishPhoto({ dish, tone }: { dish: Dish; tone: string }) {
+  const sources = [...(dish.photo ? [dish.photo] : []), ...EXTS.map((e) => `/dishes/${dish.id}.${e}`)];
   const [i, setI] = useState(0);
-  if (i >= EXTS.length) {
+  if (i >= sources.length) {
     return (
       <div className={`flex h-40 items-center justify-center bg-gradient-to-br ${tone} font-display text-6xl font-bold text-[#0B1B3A]/60`}>
         {dish.name[0]}
@@ -54,13 +57,7 @@ function DishPhoto({ dish, tone }: { dish: Dish; tone: string }) {
   }
   return (
     // eslint-disable-next-line @next/next/no-img-element
-    <img
-      src={`/dishes/${dish.id}.${EXTS[i]}`}
-      alt={dish.name}
-      loading="lazy"
-      onError={() => setI(i + 1)}
-      className="h-40 w-full object-cover"
-    />
+    <img src={sources[i]} alt={dish.name} loading="lazy" onError={() => setI(i + 1)} className="h-40 w-full object-cover" />
   );
 }
 
@@ -114,19 +111,29 @@ function DishRow({ dish, mealIndex, kcal, goal }: { dish: Dish; mealIndex: numbe
 }
 
 export default function Configurator() {
+  const { menu } = useMenu();
+  const kcalList = kcalOptions(menu);
+  const dayList = dayOptions(menu);
+
   const [goal, setGoal] = useState<Goal>("bal");
-  const [kcal, setKcal] = useState<number>(1600);
-  const [days, setDays] = useState<number>(5);
+  const [kcalSel, setKcalSel] = useState<number>(1600);
+  const [daysSel, setDaysSel] = useState<number>(5);
   const [filters, setFilters] = useState<Filters>({ diet: "any", allergens: [] });
   const [filterOpen, setFilterOpen] = useState(false);
-  const [day, setDay] = useState(0);
+  const [daySel, setDaySel] = useState(0);
+
+  const kcal = kcalList.includes(kcalSel) ? kcalSel : kcalList[0];
+  const days = dayList.includes(daysSel) ? daysSel : dayList[0];
+  const day = Math.min(daySel, days - 1);
 
   const m = macros(kcal, goal);
   const split = GOALS[goal].split;
-  const price = totalPrice(kcal, days);
-  const gap = hasGap(filters);
+  const price = totalPrice(menu, kcal, days);
+  const gap = hasGap(menu, filters);
   const count = (filters.diet !== "any" ? 1 : 0) + filters.allergens.length;
-  const next = days === 5 ? 6 : days === 6 ? 7 : null;
+  const nextDays = dayList.find((n) => n > days);
+  const curRate = menu.discounts[days] ?? 0;
+  const nextRate = nextDays ? menu.discounts[nextDays] ?? 0 : 0;
   const href =
     `/checkout?goal=${goal}&kcal=${kcal}&days=${days}` +
     `&diet=${filters.diet}&allergens=${filters.allergens.join(",")}`;
@@ -142,7 +149,7 @@ export default function Configurator() {
               Введите данные, и мы подберём подходящий рацион. Его можно изменить вручную ниже.
             </p>
           </Reveal>
-          <Calculator goal={goal} setGoal={setGoal} onApply={setKcal} />
+          <Calculator goal={goal} setGoal={setGoal} onApply={setKcalSel} />
         </div>
       </section>
 
@@ -161,15 +168,13 @@ export default function Configurator() {
                 ))}
               </Group>
               <Group title="Калорийность в день">
-                {KCALS.map((k) => (
-                  <Chip key={k} active={kcal === k} onClick={() => setKcal(k)}>{k} ккал</Chip>
+                {kcalList.map((k) => (
+                  <Chip key={k} active={kcal === k} onClick={() => setKcalSel(k)}>{k} ккал</Chip>
                 ))}
               </Group>
               <Group title="Сколько дней в неделе">
-                {DAY_OPTIONS.map((n) => (
-                  <Chip key={n} active={days === n} onClick={() => { setDays(n); if (day >= n) setDay(0); }}>
-                    {n} дней
-                  </Chip>
+                {dayList.map((n) => (
+                  <Chip key={n} active={days === n} onClick={() => setDaysSel(n)}>{n} дней</Chip>
                 ))}
               </Group>
               <div className="mt-5">
@@ -200,7 +205,7 @@ export default function Configurator() {
                 {Array.from({ length: days }, (_, i) => (
                   <button
                     key={i}
-                    onClick={() => setDay(i)}
+                    onClick={() => setDaySel(i)}
                     className={
                       "min-h-11 shrink-0 rounded-2xl border-2 px-5 text-sm font-bold transition " +
                       (day === i ? "border-orange-400 bg-orange-400 text-[#0B1B3A]" : "border-[#F0E4D3] bg-white hover:border-orange-300")
@@ -213,7 +218,7 @@ export default function Configurator() {
 
               <div className="space-y-3">
                 {MEALS.map((meal, mi) => {
-                  const dish = pickDish(mi, day, filters);
+                  const dish = pickDish(menu, mi, day, filters);
                   if (!dish) {
                     return (
                       <div key={meal.name} className="rounded-2xl border-2 border-pink-200 bg-pink-50 p-4 text-sm text-pink-800">
@@ -250,19 +255,22 @@ export default function Configurator() {
             <h3 className="mb-3 text-lg font-semibold">Ваш заказ</h3>
             <div className="py-1 text-sm">{GOALS[goal].label}, {kcal} ккал</div>
             <div className="flex justify-between py-1 text-sm text-[#5B6785]">
-              <span>{days} дней × {fmt(PRICE_PER_DAY[kcal])}</span><span>{fmt(price.base)}</span>
+              <span>{days} дней × {fmt(menu.prices[kcal] ?? 0)}</span><span>{fmt(price.base)}</span>
             </div>
             {price.discount > 0 && (
               <div className="flex justify-between py-1 text-sm font-semibold text-green-700">
-                <span>Скидка {DISCOUNT[days] * 100}%</span><span>−{fmt(price.discount)}</span>
+                <span>Скидка {pct(curRate)}%</span><span>−{fmt(price.discount)}</span>
               </div>
             )}
             <div className="mt-3 h-2 overflow-hidden rounded-full bg-[#F0E4D3]">
-              <div className="h-full rounded-full bg-gradient-to-r from-orange-400 to-lime-300 transition-[width] duration-500" style={{ width: `${(days / 7) * 100}%` }} />
+              <div
+                className="h-full rounded-full bg-gradient-to-r from-orange-400 to-lime-300 transition-[width] duration-500"
+                style={{ width: `${(days / Math.max(...dayList)) * 100}%` }}
+              />
             </div>
-            {next && (
+            {nextDays && nextRate > curRate && (
               <p className="mt-2 rounded-xl bg-amber-100 p-3 text-xs">
-                Возьмите {next} дней, и скидка будет {DISCOUNT[next] * 100}%.
+                Возьмите {nextDays} дней, и скидка будет {pct(nextRate)}%.
               </p>
             )}
             <div className="mt-3 flex items-baseline justify-between border-t border-[#F0E4D3] pt-3">

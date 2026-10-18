@@ -1,5 +1,5 @@
 import { supabase } from "@/lib/supabase";
-import { MEALS, pickDish, type Allergen, type Diet } from "@/lib/menu";
+import { MEALS, pickDish, type Allergen, type Diet, type Menu } from "@/lib/menu";
 
 export type PayMethod = "online" | "courier";
 export type Profile = { goal_weight: number | null; pay_default: PayMethod };
@@ -96,12 +96,12 @@ export async function loadApprovedReviews(limit = 6): Promise<Review[]> {
   if (error) throw error;
   return (data ?? []) as Review[];
 }
-export function dishesOfOrder(o: { days: number; diet: Diet; allergens: Allergen[] }) {
+export function dishesOfOrder(menu: Menu, o: { days: number; diet: Diet; allergens: Allergen[] }) {
   const f = { diet: o.diet, allergens: o.allergens };
   const map = new Map<string, string>();
   for (let d = 0; d < o.days; d++) {
     MEALS.forEach((_, mi) => {
-      const x = pickDish(mi, d, f);
+      const x = pickDish(menu, mi, d, f);
       if (x) map.set(x.id, x.name);
     });
   }
