@@ -1,36 +1,66 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# 🥗 ВАКУУМ — Доставка здорового питания
 
-## Getting Started
+Современный веб-сервис доставки здорового питания, ориентированный на удобство пользователей, сбалансированный рацион и комфортный выбор блюд.
 
-First, run the development server:
+## 📖 О проекте
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
+**ВАКУУМ** — веб-проект сервиса доставки здорового питания. Его цель — сделать выбор полезных блюд простым и удобным, объединив современный дизайн, интуитивно понятный интерфейс и функциональность интернет-сервиса.
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Проект разрабатывается с использованием TypeScript.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## ✨ Основные возможности
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+- 🥗 Просмотр меню и доступных блюд.
+- 🍱 Ознакомление с ассортиментом здорового питания.
+- 🛒 Удобное взаимодействие с интерфейсом сервиса.
+- 📱 Адаптивный пользовательский интерфейс.
+- 🎨 Современный дизайн и продуманная навигация.
 
-## Learn More
+*Фактический функционал зависит от текущей реализации проекта.*
 
-To learn more about Next.js, take a look at the following resources:
+## 🛠 Технологический стек
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+- **TypeScript** — типизация и повышение надёжности кода.
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+Дополнительные технологии и инструменты будут указаны по мере развития проекта.
 
-## Deploy on Vercel
+## 🚀 Запуск проекта
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+### Требования
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+- [Node.js](https://nodejs.org/)
+- npm
+
+### Установка
+
+1. Клонируйте репозиторий:
+
+   ```bash
+   git clone <URL-РЕПОЗИТОРИЯ>
+   ```
+
+2. Перейдите в директорию проекта:
+
+   ```bash
+   cd <НАЗВАНИЕ-ПРОЕКТА>
+   ```
+
+3. Установите зависимости:
+
+   ```bash
+   npm install
+   ```
+
+4. Запустите проект командой, предусмотренной в `package.json`.
+
+## 📌 Статус проекта
+
+Проект находится в разработке. Новые возможности и улучшения добавляются по мере реализации.
+
+## 👨‍💻 Автор
+
+Автор: *[Твоё имя или никнейм на GitHub]*
+
+---
+
+**ВАКУУМ** — питание, которое вписывается в твой ритм жизни. 🌿
