@@ -21,7 +21,6 @@ export default function Navbar() {
   const pathname = usePathname();
   const { user, isAdmin } = useAuth();
   const home = pathname === "/";
-  const [open, setOpen] = useState(false);
   const [active, setActive] = useState("");
   const bar = useRef<HTMLDivElement>(null);
 
@@ -67,8 +66,8 @@ export default function Navbar() {
   const cabinetLabel = user ? "Кабинет" : "Войти";
 
   return (
-    <header className="sticky top-0 z-40 bg-[#0B1B3A]">
-      <div className="mx-auto flex max-w-5xl items-center justify-between gap-10 px-4 py-3">
+    <header className="sticky top-0 z-40 bg-[#0B1B3A] pt-[env(safe-area-inset-top)]">
+      <div className="mx-auto flex max-w-5xl items-center justify-between gap-4 px-4 py-3 md:gap-10">
         <Link href="/" aria-label="На главную">
           <Logo className="h-10" dark />
         </Link>
@@ -81,25 +80,11 @@ export default function Navbar() {
           <Link href="/account" className={`${cabinet} ml-2`}>{cabinetLabel}</Link>
         </nav>
 
-        <button
-          className="flex min-h-11 min-w-11 items-center justify-center rounded-lg text-2xl text-white md:hidden"
-          aria-label={open ? "Закрыть меню" : "Открыть меню"}
-          aria-expanded={open}
-          onClick={() => setOpen(!open)}
-        >
-          {open ? "×" : "☰"}
-        </button>
+        <div className="flex items-center gap-2 md:hidden">
+          {isAdmin && <Link href="/admin" className={`${pill} bg-white text-[#0B1B3A]`}>Админка</Link>}
+          <Link href="/account" className={cabinet}>{cabinetLabel}</Link>
+        </div>
       </div>
-
-      {open && (
-        <nav className="flex flex-col gap-2 border-t border-white/10 px-4 pb-4 pt-3 md:hidden" aria-label="Мобильное меню">
-          {LINKS.map((l) => (
-            <Link key={l.id} href={l.href} onClick={() => setOpen(false)} className={linkClass(isOn(l.id))}>{l.label}</Link>
-          ))}
-          {isAdmin && <Link href="/admin" onClick={() => setOpen(false)} className={linkClass(pathname.startsWith("/admin"))}>Админка</Link>}
-          <Link href="/account" onClick={() => setOpen(false)} className={cabinet}>{cabinetLabel}</Link>
-        </nav>
-      )}
 
       <div
         ref={bar}

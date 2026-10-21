@@ -46,7 +46,7 @@ export default function Hero() {
       <div className="blob blob2" aria-hidden="true" style={{ width: 340, height: 340, right: "-5%", top: "10%", background: "#FFD24D" }} />
       <div className="blob" aria-hidden="true" style={{ width: 300, height: 300, left: "35%", bottom: "-12%", background: "#5BC0FF" }} />
 
-      <div className="relative mx-auto grid min-h-[calc(100svh-4rem)] max-w-5xl items-center gap-8 px-4 py-16 md:grid-cols-2">
+      <div className="relative mx-auto grid max-w-5xl items-center gap-8 px-4 py-10 md:min-h-[calc(100svh-4rem)] md:py-16 md:grid-cols-2">
         <div>
           <div className="hero-word inline-flex items-center gap-2 rounded-full bg-[#0B1B3A] px-4 py-1.5 text-sm font-semibold text-white">
             <span className="h-2 w-2 rounded-full bg-lime-300" />

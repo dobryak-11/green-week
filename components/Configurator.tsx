@@ -1,8 +1,9 @@
 ﻿"use client";
 
 import Link from "next/link";
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import Calculator from "@/components/Calculator";
+import DishSheet, { DishPhoto, MEAL_TONES } from "@/components/DishSheet";
 import FilterPanel from "@/components/FilterPanel";
 import { useMenu } from "@/components/MenuProvider";
 import Reveal from "@/components/Reveal";
@@ -14,8 +15,6 @@ import {
 const fmt = (n: number) => n.toLocaleString("ru-RU") + " ₽";
 const pct = (r: number) => Math.round(r * 100);
 const MEAL_COLORS = ["bg-amber-300", "bg-orange-400", "bg-lime-300", "bg-sky-300"];
-const MEAL_TONES = ["from-amber-200 to-amber-400", "from-orange-200 to-orange-400", "from-lime-200 to-lime-400", "from-sky-200 to-sky-400"];
-const EXTS = ["jpg", "png", "webp"];
 
 function Chip({ active, onClick, children }: { active: boolean; onClick: () => void; children: React.ReactNode }) {
   return (
@@ -45,23 +44,9 @@ function Dot({ c }: { c: string }) {
   return <i className="mr-1 inline-block h-2 w-2 rounded-full" style={{ background: c }} />;
 }
 
-function DishPhoto({ dish, tone }: { dish: Dish; tone: string }) {
-  const sources = [...(dish.photo ? [dish.photo] : []), ...EXTS.map((e) => `/dishes/${dish.id}.${e}`)];
-  const [i, setI] = useState(0);
-  if (i >= sources.length) {
-    return (
-      <div className={`flex h-40 items-center justify-center bg-gradient-to-br ${tone} font-display text-6xl font-bold text-[#0B1B3A]/60`}>
-        {dish.name[0]}
-      </div>
-    );
-  }
-  return (
-    // eslint-disable-next-line @next/next/no-img-element
-    <img src={sources[i]} alt={dish.name} loading="lazy" onError={() => setI(i + 1)} className="h-40 w-full object-cover" />
-  );
-}
-
-function DishRow({ dish, mealIndex, kcal, goal }: { dish: Dish; mealIndex: number; kcal: number; goal: Goal }) {
+function DishRow({
+  dish, mealIndex, kcal, goal, onOpen,
+}: { dish: Dish; mealIndex: number; kcal: number; goal: Goal; onOpen: () => void }) {
   const meal = MEALS[mealIndex];
   const k = Math.round((kcal * meal.share) / 10) * 10;
   const mm = macros(k, goal);
@@ -69,6 +54,7 @@ function DishRow({ dish, mealIndex, kcal, goal }: { dish: Dish; mealIndex: numbe
     <div className="group relative">
       <button
         type="button"
+        onClick={onOpen}
         className="flex w-full items-center gap-4 rounded-2xl border-2 border-[#F0E4D3] bg-white p-4 text-left transition hover:border-orange-300 hover:shadow-lg focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-orange-200"
       >
         <span className={`flex h-12 w-14 shrink-0 items-center justify-center rounded-xl text-xs font-bold text-[#0B1B3A] ${MEAL_COLORS[mealIndex]}`}>
@@ -84,11 +70,12 @@ function DishRow({ dish, mealIndex, kcal, goal }: { dish: Dish; mealIndex: numbe
             <span><Dot c="#4CC26B" />У {mm.c} г</span>
           </span>
         </span>
+        <span className="text-xl text-[#5B6785] md:hidden" aria-hidden="true">›</span>
       </button>
 
       <div
         role="tooltip"
-        className="pointer-events-none invisible absolute left-0 top-full z-30 mt-2 w-80 max-w-[calc(100vw-2rem)] translate-y-2 overflow-hidden rounded-3xl border-2 border-[#F0E4D3] bg-white opacity-0 shadow-2xl transition duration-200 group-focus-within:visible group-focus-within:translate-y-0 group-focus-within:opacity-100 group-hover:visible group-hover:translate-y-0 group-hover:opacity-100"
+        className="pointer-events-none invisible absolute left-0 top-full z-30 mt-2 hidden w-80 max-w-[calc(100vw-2rem)] translate-y-2 overflow-hidden rounded-3xl border-2 border-[#F0E4D3] bg-white opacity-0 shadow-2xl transition duration-200 group-focus-within:visible group-focus-within:translate-y-0 group-focus-within:opacity-100 group-hover:visible group-hover:translate-y-0 group-hover:opacity-100 md:block"
       >
         <DishPhoto dish={dish} tone={MEAL_TONES[mealIndex]} />
         <div className="p-4">
@@ -121,6 +108,26 @@ export default function Configurator() {
   const [filters, setFilters] = useState<Filters>({ diet: "any", allergens: [] });
   const [filterOpen, setFilterOpen] = useState(false);
   const [daySel, setDaySel] = useState(0);
+  const [sheet, setSheet] = useState<{ dish: Dish; mealIndex: number } | null>(null);
+
+  const menuRef = useRef<HTMLElement>(null);
+  const asideRef = useRef<HTMLElement>(null);
+  const [inMenu, setInMenu] = useState(false);
+  const [asideSeen, setAsideSeen] = useState(false);
+
+  useEffect(() => {
+    const a = menuRef.current, b = asideRef.current;
+    if (!a || !b) return;
+    const io1 = new IntersectionObserver(([e]) => setInMenu(e.isIntersecting), { threshold: 0.05 });
+    const io2 = new IntersectionObserver(([e]) => setAsideSeen(e.isIntersecting), { threshold: 0.2 });
+    io1.observe(a);
+    io2.observe(b);
+    return () => { io1.disconnect(); io2.disconnect(); };
+  }, []);
+
+  const openDish = (dish: Dish, mealIndex: number) => {
+    if (window.matchMedia("(max-width: 767px)").matches) setSheet({ dish, mealIndex });
+  };
 
   const kcal = kcalList.includes(kcalSel) ? kcalSel : kcalList[0];
   const days = dayList.includes(daysSel) ? daysSel : dayList[0];
@@ -137,11 +144,12 @@ export default function Configurator() {
   const href =
     `/checkout?goal=${goal}&kcal=${kcal}&days=${days}` +
     `&diet=${filters.diet}&allergens=${filters.allergens.join(",")}`;
+  const showBar = inMenu && !asideSeen;
 
   return (
     <>
       <section id="calc" className="scroll-mt-20 bg-[#FFF1DC]">
-        <div className="mx-auto max-w-5xl px-4 py-16">
+        <div className="mx-auto max-w-5xl px-4 py-12 md:py-16">
           <Reveal>
             <span className="inline-block rounded-full bg-orange-400 px-4 py-1 text-sm font-bold text-[#0B1B3A]">Шаг 1</span>
             <h2 className="mt-3 text-3xl font-bold md:text-4xl">Рассчитайте свою норму калорий</h2>
@@ -153,7 +161,7 @@ export default function Configurator() {
         </div>
       </section>
 
-      <section id="menu" className="mx-auto max-w-5xl scroll-mt-20 px-4 py-16">
+      <section id="menu" ref={menuRef} className="mx-auto max-w-5xl scroll-mt-20 px-4 pb-32 pt-12 md:pb-16 md:pt-16">
         <Reveal>
           <span className="inline-block rounded-full bg-lime-300 px-4 py-1 text-sm font-bold text-[#0B1B3A]">Шаг 2</span>
           <h2 className="mb-8 mt-3 text-3xl font-bold md:text-4xl">Соберите меню на неделю</h2>
@@ -200,8 +208,11 @@ export default function Configurator() {
 
             <div className="mt-6">
               <h3 className="mb-1 text-xl font-semibold">Ваше меню</h3>
-              <p className="mb-4 text-xs text-[#5B6785]">Наведите курсор на блюдо, чтобы увидеть фото, состав и аллергены.</p>
-              <div className="mb-4 flex gap-2 overflow-x-auto pb-1">
+              <p className="mb-4 text-xs text-[#5B6785]">
+                <span className="md:hidden">Нажмите на блюдо, чтобы увидеть фото, состав и аллергены.</span>
+                <span className="hidden md:inline">Наведите курсор на блюдо, чтобы увидеть фото, состав и аллергены.</span>
+              </p>
+              <div className="-mx-4 mb-4 flex gap-2 overflow-x-auto px-4 pb-1">
                 {Array.from({ length: days }, (_, i) => (
                   <button
                     key={i}
@@ -226,7 +237,16 @@ export default function Configurator() {
                       </div>
                     );
                   }
-                  return <DishRow key={dish.id} dish={dish} mealIndex={mi} kcal={kcal} goal={goal} />;
+                  return (
+                    <DishRow
+                      key={dish.id}
+                      dish={dish}
+                      mealIndex={mi}
+                      kcal={kcal}
+                      goal={goal}
+                      onOpen={() => openDish(dish, mi)}
+                    />
+                  );
                 })}
               </div>
 
@@ -251,7 +271,7 @@ export default function Configurator() {
             </div>
           </div>
 
-          <aside className="h-fit rounded-3xl border-2 border-[#F0E4D3] bg-white p-5 shadow-sm md:sticky md:top-24">
+          <aside ref={asideRef} className="h-fit rounded-3xl border-2 border-[#F0E4D3] bg-white p-5 shadow-sm md:sticky md:top-24">
             <h3 className="mb-3 text-lg font-semibold">Ваш заказ</h3>
             <div className="py-1 text-sm">{GOALS[goal].label}, {kcal} ккал</div>
             <div className="flex justify-between py-1 text-sm text-[#5B6785]">
@@ -293,6 +313,25 @@ export default function Configurator() {
         </div>
       </section>
 
+      {showBar && (
+        <div className="fixed inset-x-0 bottom-[calc(3.5rem+env(safe-area-inset-bottom))] z-30 px-3 pb-2 md:hidden">
+          <div className="sheet-up flex items-center gap-3 rounded-2xl bg-[#0B1B3A] p-3 text-white shadow-2xl">
+            <div className="min-w-0 flex-1">
+              <div className="truncate text-xs text-sky-200">{GOALS[goal].label}, {kcal} ккал, {days} дн.</div>
+              <div className="font-display text-xl font-bold">{fmt(price.total)}</div>
+            </div>
+            {gap ? (
+              <span className="rounded-full bg-white/20 px-4 py-3 text-sm font-bold">Измените фильтр</span>
+            ) : (
+              <Link href={href} className="rounded-full bg-orange-400 px-6 py-3 font-bold text-[#0B1B3A]">Заказать</Link>
+            )}
+          </div>
+        </div>
+      )}
+
+      {sheet && (
+        <DishSheet dish={sheet.dish} mealIndex={sheet.mealIndex} kcal={kcal} goal={goal} onClose={() => setSheet(null)} />
+      )}
       <FilterPanel open={filterOpen} onClose={() => setFilterOpen(false)} filters={filters} setFilters={setFilters} />
     </>
   );

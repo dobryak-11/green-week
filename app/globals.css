@@ -78,3 +78,16 @@ input[type="checkbox"], input[type="radio"] { accent-color: #ff8a3d; }
   .reveal { opacity: 1; transform: none; }
   .draw { stroke-dashoffset: 0; }
 }
+html { -webkit-text-size-adjust: 100%; }
+body { overflow-x: clip; }
+button, a, summary, label { touch-action: manipulation; -webkit-tap-highlight-color: transparent; }
+
+@keyframes sheetup {
+  from { transform: translateY(48px); opacity: 0; }
+  to { transform: none; opacity: 1; }
+}
+.sheet-up { animation: sheetup 0.3s cubic-bezier(0.2, 0.7, 0.2, 1); }
+
+@media (hover: none) {
+  .card-lift:hover { transform: none; box-shadow: none; }
+}

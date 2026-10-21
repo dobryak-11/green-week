@@ -34,9 +34,9 @@ export default function Packaging() {
           [Расскажите, чем особенная ваша упаковка: сохранность блюд, удобство, материалы.]
         </p>
       </Reveal>
-      <div className="mt-10 grid gap-5 sm:grid-cols-3">
+      <div className="-mx-4 mt-10 flex snap-x snap-mandatory gap-4 overflow-x-auto px-4 pb-2 sm:mx-0 sm:grid sm:grid-cols-3 sm:gap-5 sm:overflow-visible sm:px-0">
         {ITEMS.map((it, i) => (
-          <Reveal key={it.src} delay={i * 120}>
+          <Reveal key={it.src} delay={i * 120} className="w-[78%] shrink-0 snap-center sm:w-auto">
             <article className="group card-lift overflow-hidden rounded-3xl border-2 border-[#F0E4D3] bg-white">
               <div className={`flex h-64 items-center justify-center p-5 ${it.bg}`}>
                 <Photo src={it.src} alt={it.title} />

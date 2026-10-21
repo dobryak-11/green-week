@@ -38,7 +38,7 @@ export default function FilterPanel({ open, onClose, filters, setFilters }: Prop
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center bg-[#0B1B3A]/60 p-4 backdrop-blur-sm"
+      className="fixed inset-0 z-50 flex items-end justify-center bg-[#0B1B3A]/60 backdrop-blur-sm md:items-center md:p-4"
       onClick={onClose}
     >
       <div
@@ -48,7 +48,7 @@ export default function FilterPanel({ open, onClose, filters, setFilters }: Prop
         aria-modal="true"
         aria-label="Фильтр по питанию и аллергенам"
         onClick={(e) => e.stopPropagation()}
-        className="pop flex max-h-[90vh] w-full max-w-xl flex-col overflow-hidden rounded-[2rem] border-2 border-[#F0E4D3] bg-[#FFFAF3] text-[#0B1B3A] shadow-2xl outline-none"
+        className="sheet-up flex max-h-[92svh] w-full max-w-xl flex-col overflow-hidden rounded-t-[2rem] pb-[env(safe-area-inset-bottom)] md:rounded-[2rem] border-2 border-[#F0E4D3] bg-[#FFFAF3] text-[#0B1B3A] shadow-2xl outline-none"
       >
         <div className="flex items-center justify-between border-b border-[#F0E4D3] px-6 py-5">
           <div>

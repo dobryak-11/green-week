@@ -37,7 +37,7 @@ export default function CookieBanner() {
   );
 
   return (
-    <div role="dialog" aria-label="Настройки cookie" className="fixed inset-x-0 bottom-0 z-50 p-3">
+    <div role="dialog" aria-label="Настройки cookie" className="fixed inset-x-0 bottom-[calc(3.5rem+env(safe-area-inset-bottom))] z-50 p-3 md:bottom-0">
       <div className="mx-auto max-w-3xl rounded-2xl border border-neutral-200 bg-white p-5 text-neutral-900 shadow-2xl">
         <p className="text-sm">
           Мы используем файлы cookie, чтобы сайт работал корректно, а также для аналитики и улучшения сервиса.
