@@ -2,14 +2,14 @@
 
 import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
-import Calculator from "@/components/Calculator";
 import DishSheet, { DishPhoto, MEAL_TONES } from "@/components/DishSheet";
 import FilterPanel from "@/components/FilterPanel";
 import { useMenu } from "@/components/MenuProvider";
+import { useRation } from "@/components/RationProvider";
 import Reveal from "@/components/Reveal";
 import {
   ALLERGENS, DIETS, GOALS, MEALS, dayOptions, hasGap, kcalOptions, macros, pickDish, totalPrice,
-  type Dish, type Filters, type Goal,
+  type Dish, type Goal,
 } from "@/lib/menu";
 
 const fmt = (n: number) => n.toLocaleString("ru-RU") + " ₽";
@@ -97,32 +97,24 @@ function DishRow({
   );
 }
 
-export default function Configurator() {
+export default function MenuBuilder() {
   const { menu } = useMenu();
+  const { goal, kcal: kcalSel, days: daysSel, filters, setGoal, setKcal, setDays, setFilters } = useRation();
   const kcalList = kcalOptions(menu);
   const dayList = dayOptions(menu);
 
-  const [goal, setGoal] = useState<Goal>("bal");
-  const [kcalSel, setKcalSel] = useState<number>(1600);
-  const [daysSel, setDaysSel] = useState<number>(5);
-  const [filters, setFilters] = useState<Filters>({ diet: "any", allergens: [] });
   const [filterOpen, setFilterOpen] = useState(false);
   const [daySel, setDaySel] = useState(0);
   const [sheet, setSheet] = useState<{ dish: Dish; mealIndex: number } | null>(null);
-
-  const menuRef = useRef<HTMLElement>(null);
   const asideRef = useRef<HTMLElement>(null);
-  const [inMenu, setInMenu] = useState(false);
   const [asideSeen, setAsideSeen] = useState(false);
 
   useEffect(() => {
-    const a = menuRef.current, b = asideRef.current;
-    if (!a || !b) return;
-    const io1 = new IntersectionObserver(([e]) => setInMenu(e.isIntersecting), { threshold: 0.05 });
-    const io2 = new IntersectionObserver(([e]) => setAsideSeen(e.isIntersecting), { threshold: 0.2 });
-    io1.observe(a);
-    io2.observe(b);
-    return () => { io1.disconnect(); io2.disconnect(); };
+    const el = asideRef.current;
+    if (!el) return;
+    const io = new IntersectionObserver(([e]) => setAsideSeen(e.isIntersecting), { threshold: 0.2 });
+    io.observe(el);
+    return () => io.disconnect();
   }, []);
 
   const openDish = (dish: Dish, mealIndex: number) => {
@@ -144,28 +136,15 @@ export default function Configurator() {
   const href =
     `/checkout?goal=${goal}&kcal=${kcal}&days=${days}` +
     `&diet=${filters.diet}&allergens=${filters.allergens.join(",")}`;
-  const showBar = inMenu && !asideSeen;
 
   return (
     <>
-      <section id="calc" className="scroll-mt-20 bg-[#FFF1DC]">
-        <div className="mx-auto max-w-5xl px-4 py-12 md:py-16">
-          <Reveal>
-            <span className="inline-block rounded-full bg-orange-400 px-4 py-1 text-sm font-bold text-[#0B1B3A]">Шаг 1</span>
-            <h2 className="mt-3 text-3xl font-bold md:text-4xl">Рассчитайте свою норму калорий</h2>
-            <p className="mb-8 mt-3 max-w-xl text-[#44506f]">
-              Введите данные, и мы подберём подходящий рацион. Его можно изменить вручную ниже.
-            </p>
-          </Reveal>
-          <Calculator goal={goal} setGoal={setGoal} onApply={setKcalSel} />
-        </div>
-      </section>
-
-      <section id="menu" ref={menuRef} className="mx-auto max-w-5xl scroll-mt-20 px-4 pb-32 pt-12 md:pb-16 md:pt-16">
-        <Reveal>
-          <span className="inline-block rounded-full bg-lime-300 px-4 py-1 text-sm font-bold text-[#0B1B3A]">Шаг 2</span>
-          <h2 className="mb-8 mt-3 text-3xl font-bold md:text-4xl">Соберите меню на неделю</h2>
-        </Reveal>
+      <section className="mx-auto max-w-5xl px-4 pb-32 pt-10 md:pb-16 md:pt-16">
+        <span className="inline-block rounded-full bg-lime-300 px-4 py-1 text-sm font-bold text-[#0B1B3A]">Шаг 2 из 2</span>
+        <h1 className="mt-3 text-3xl font-bold md:text-4xl">Соберите меню на неделю</h1>
+        <p className="mb-8 mt-3 text-sm">
+          <Link href="/calc" className="font-semibold underline">← Изменить расчёт калорий</Link>
+        </p>
 
         <div className="grid gap-6 md:grid-cols-[1fr_320px]">
           <div>
@@ -177,12 +156,12 @@ export default function Configurator() {
               </Group>
               <Group title="Калорийность в день">
                 {kcalList.map((k) => (
-                  <Chip key={k} active={kcal === k} onClick={() => setKcalSel(k)}>{k} ккал</Chip>
+                  <Chip key={k} active={kcal === k} onClick={() => setKcal(k)}>{k} ккал</Chip>
                 ))}
               </Group>
               <Group title="Сколько дней в неделе">
                 {dayList.map((n) => (
-                  <Chip key={n} active={days === n} onClick={() => setDaysSel(n)}>{n} дней</Chip>
+                  <Chip key={n} active={days === n} onClick={() => setDays(n)}>{n} дней</Chip>
                 ))}
               </Group>
               <div className="mt-5">
@@ -207,7 +186,7 @@ export default function Configurator() {
             </div>
 
             <div className="mt-6">
-              <h3 className="mb-1 text-xl font-semibold">Ваше меню</h3>
+              <h2 className="mb-1 text-xl font-semibold">Ваше меню</h2>
               <p className="mb-4 text-xs text-[#5B6785]">
                 <span className="md:hidden">Нажмите на блюдо, чтобы увидеть фото, состав и аллергены.</span>
                 <span className="hidden md:inline">Наведите курсор на блюдо, чтобы увидеть фото, состав и аллергены.</span>
@@ -238,41 +217,36 @@ export default function Configurator() {
                     );
                   }
                   return (
-                    <DishRow
-                      key={dish.id}
-                      dish={dish}
-                      mealIndex={mi}
-                      kcal={kcal}
-                      goal={goal}
-                      onOpen={() => openDish(dish, mi)}
-                    />
+                    <DishRow key={dish.id} dish={dish} mealIndex={mi} kcal={kcal} goal={goal} onOpen={() => openDish(dish, mi)} />
                   );
                 })}
               </div>
 
-              <div className="mt-5 rounded-3xl bg-[#0B1B3A] p-5 text-white">
-                <div className="flex flex-wrap items-end justify-between gap-3">
-                  <div>
-                    <div className="text-xs text-sky-200">Итого за день</div>
-                    <div key={kcal} className="pop font-display text-3xl font-bold">{kcal} ккал</div>
+              <Reveal>
+                <div className="mt-5 rounded-3xl bg-[#0B1B3A] p-5 text-white">
+                  <div className="flex flex-wrap items-end justify-between gap-3">
+                    <div>
+                      <div className="text-xs text-sky-200">Итого за день</div>
+                      <div key={kcal} className="pop font-display text-3xl font-bold">{kcal} ккал</div>
+                    </div>
+                    <div className="flex gap-4 text-sm">
+                      <span><Dot c="#FF6B4A" />Б <b>{m.p} г</b></span>
+                      <span><Dot c="#FFC83D" />Ж <b>{m.f} г</b></span>
+                      <span><Dot c="#4CC26B" />У <b>{m.c} г</b></span>
+                    </div>
                   </div>
-                  <div className="flex gap-4 text-sm">
-                    <span><Dot c="#FF6B4A" />Б <b>{m.p} г</b></span>
-                    <span><Dot c="#FFC83D" />Ж <b>{m.f} г</b></span>
-                    <span><Dot c="#4CC26B" />У <b>{m.c} г</b></span>
+                  <div className="mt-4 flex h-3 overflow-hidden rounded-full bg-white/10">
+                    <div className="transition-[width] duration-700" style={{ width: `${split[0]}%`, background: "#FF6B4A" }} />
+                    <div className="transition-[width] duration-700" style={{ width: `${split[1]}%`, background: "#FFC83D" }} />
+                    <div className="transition-[width] duration-700" style={{ width: `${split[2]}%`, background: "#4CC26B" }} />
                   </div>
                 </div>
-                <div className="mt-4 flex h-3 overflow-hidden rounded-full bg-white/10">
-                  <div className="transition-[width] duration-700" style={{ width: `${split[0]}%`, background: "#FF6B4A" }} />
-                  <div className="transition-[width] duration-700" style={{ width: `${split[1]}%`, background: "#FFC83D" }} />
-                  <div className="transition-[width] duration-700" style={{ width: `${split[2]}%`, background: "#4CC26B" }} />
-                </div>
-              </div>
+              </Reveal>
             </div>
           </div>
 
           <aside ref={asideRef} className="h-fit rounded-3xl border-2 border-[#F0E4D3] bg-white p-5 shadow-sm md:sticky md:top-24">
-            <h3 className="mb-3 text-lg font-semibold">Ваш заказ</h3>
+            <h2 className="mb-3 text-lg font-semibold">Ваш заказ</h2>
             <div className="py-1 text-sm">{GOALS[goal].label}, {kcal} ккал</div>
             <div className="flex justify-between py-1 text-sm text-[#5B6785]">
               <span>{days} дней × {fmt(menu.prices[kcal] ?? 0)}</span><span>{fmt(price.base)}</span>
@@ -313,7 +287,7 @@ export default function Configurator() {
         </div>
       </section>
 
-      {showBar && (
+      {!asideSeen && (
         <div className="fixed inset-x-0 bottom-[calc(3.5rem+env(safe-area-inset-bottom))] z-30 px-3 pb-2 md:hidden">
           <div className="sheet-up flex items-center gap-3 rounded-2xl bg-[#0B1B3A] p-3 text-white shadow-2xl">
             <div className="min-w-0 flex-1">

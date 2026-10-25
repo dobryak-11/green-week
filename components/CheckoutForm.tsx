@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import Link from "next/link";
 import { useEffect, useState } from "react";
@@ -155,7 +155,7 @@ export default function CheckoutForm({ goal, kcal, days, diet, allergens, base, 
   if (!user) {
     return (
       <div className="mx-auto max-w-lg rounded-3xl border-2 border-[#F0E4D3] bg-white p-6">
-        <Link href="/#menu" className="text-sm font-semibold underline">← Вернуться к меню</Link>
+        <Link href="/menu" className="text-sm font-semibold underline">← Вернуться к меню</Link>
         <h1 className="mb-1 mt-3 text-2xl font-bold">Войдите, чтобы оформить заказ</h1>
         <p className="mb-4 text-sm text-[#5B6785]">Ваш рацион сохранён, после входа вы вернётесь к оформлению.</p>
         <LoginForm />
@@ -165,7 +165,7 @@ export default function CheckoutForm({ goal, kcal, days, diet, allergens, base, 
 
   return (
     <>
-      <Link href="/#menu" className="text-sm font-semibold underline">← Вернуться к меню</Link>
+      <Link href="/menu" className="text-sm font-semibold underline">← Вернуться к меню</Link>
       <h1 className="mb-6 mt-3 text-3xl font-bold">Оформление заказа</h1>
       <div className="grid gap-6 md:grid-cols-[1fr_320px]">
         <div className="space-y-4">

@@ -1,6 +1,7 @@
 "use client";
 
 import { useRef, useState } from "react";
+import Link from "next/link";
 
 function Pack({ src, rot, depth, className }: { src: string; rot: number; depth: number; className: string }) {
   const [ok, setOk] = useState(true);
@@ -71,12 +72,12 @@ export default function Hero() {
           </p>
 
           <div className="hero-word mt-8 flex flex-wrap gap-3" style={{ animationDelay: "1.1s" }}>
-            <a href="#calc" className="rounded-full bg-orange-400 px-7 py-3.5 font-bold text-[#0B1B3A] shadow-lg shadow-orange-300/60 transition hover:-translate-y-0.5 hover:bg-orange-300">
-              Подобрать рацион
-            </a>
-            <a href="#packaging" className="rounded-full border-2 border-[#0B1B3A] px-7 py-3.5 font-bold text-[#0B1B3A] transition hover:bg-[#0B1B3A] hover:text-white">
-              Наша упаковка
-            </a>
+            <Link href="/calc" className="rounded-full bg-orange-400 px-7 py-3.5 font-bold text-[#0B1B3A] shadow-lg shadow-orange-300/60 transition hover:-translate-y-0.5 hover:bg-orange-300">
+            Подобрать рацион
+            </Link>
+            <Link href="/packaging" className="rounded-full border-2 border-[#0B1B3A] px-7 py-3.5 font-bold text-[#0B1B3A] transition hover:bg-[#0B1B3A] hover:text-white">
+            Наша упаковка
+            </Link>
           </div>
         </div>
 

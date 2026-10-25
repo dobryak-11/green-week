@@ -7,7 +7,7 @@
   --line: #f0e4d3;
 }
 
-html { scroll-padding-top: 5rem; scroll-behavior: smooth; }
+html { scroll-padding-top: 5rem; }
 
 body {
   background: var(--bg);
@@ -91,3 +91,5 @@ button, a, summary, label { touch-action: manipulation; -webkit-tap-highlight-co
 @media (hover: none) {
   .card-lift:hover { transform: none; box-shadow: none; }
 }
+@keyframes pagein { from { opacity: 0; } to { opacity: 1; } }
+.page-in { animation: pagein 0.35s ease-out; }

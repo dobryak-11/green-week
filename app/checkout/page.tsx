@@ -1,4 +1,4 @@
-﻿import { redirect } from "next/navigation";
+import { redirect } from "next/navigation";
 import { createClient } from "@supabase/supabase-js";
 import CheckoutForm from "@/components/CheckoutForm";
 import { GOALS, hasGap, parseFilters, totalPrice, type Goal } from "@/lib/menu";
@@ -20,7 +20,7 @@ export default async function CheckoutPage({ searchParams }: { searchParams: SP 
   if (!(goal in GOALS) || !(kcal in menu.prices) || !(days in menu.discounts)) redirect("/");
 
   const filters = parseFilters(sp.diet, sp.allergens);
-  if (hasGap(menu, filters)) redirect("/#menu");
+  if (hasGap(menu, filters)) redirect("/menu");
   const price = totalPrice(menu, kcal, days);
 
   return (

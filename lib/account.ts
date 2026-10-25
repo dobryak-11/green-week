@@ -1,8 +1,8 @@
 import { supabase } from "@/lib/supabase";
-import { MEALS, pickDish, type Allergen, type Diet, type Menu } from "@/lib/menu";
+import { MEALS, pickDish, type Allergen, type Diet, type Filters, type Menu } from "@/lib/menu";
 
 export type PayMethod = "online" | "courier";
-export type Profile = { goal_weight: number | null; pay_default: PayMethod };
+export type Profile = { goal_weight: number | null; pay_default: PayMethod; filters: Filters | null };
 export type WeightRow = { id: string; week_start: string; weight: number; note: string | null };
 export type Address = {
   id: string; label: string; city: string; address: string;
@@ -24,9 +24,9 @@ export function mondayOf(d = new Date()): string {
 
 /* профиль */
 export async function loadProfile(): Promise<Profile> {
-  const { data, error } = await supabase.from("profiles").select("goal_weight,pay_default").maybeSingle();
+  const { data, error } = await supabase.from("profiles").select("goal_weight,pay_default,filters").maybeSingle();
   if (error) throw error;
-  return (data as Profile | null) ?? { goal_weight: null, pay_default: "online" };
+  return (data as Profile | null) ?? { goal_weight: null, pay_default: "online", filters: null };
 }
 export async function saveProfile(uid: string, patch: Partial<Profile>) {
   const { error } = await supabase

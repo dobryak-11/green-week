@@ -13,7 +13,7 @@ export default function OrdersTab({ orders, error }: { orders: SavedOrder[] | nu
     return (
       <div className="rounded-3xl border-2 border-[#F0E4D3] bg-white p-8 text-center">
         <p className="text-[#44506f]">Заказов пока нет.</p>
-        <Link href="/#calc" className="mt-4 inline-block rounded-full bg-orange-400 px-6 py-3 font-bold text-[#0B1B3A]">
+        <Link href="/calc" className="mt-4 inline-block rounded-full bg-orange-400 px-6 py-3 font-bold text-[#0B1B3A]">
           Подобрать рацион
         </Link>
       </div>

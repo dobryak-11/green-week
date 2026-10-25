@@ -7,6 +7,7 @@ import CookieBanner from "@/components/CookieBanner";
 import Footer from "@/components/Footer";
 import MenuProvider from "@/components/MenuProvider";
 import Navbar from "@/components/Navbar";
+import RationProvider from "@/components/RationProvider";
 
 const body = Onest({ subsets: ["latin", "cyrillic"], variable: "--font-body", display: "swap" });
 const display = Unbounded({ subsets: ["latin", "cyrillic"], variable: "--font-display", display: "swap" });
@@ -29,12 +30,14 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
       <body className="pb-[calc(3.5rem+env(safe-area-inset-bottom))] antialiased md:pb-0">
         <AuthProvider>
           <MenuProvider>
-            <Navbar />
-            {children}
-            <Footer />
-            <BottomNav />
-            <CookieBanner />
-          </MenuProvider>
+          <RationProvider>
+          <Navbar />
+          {children}
+          <Footer />
+        <BottomNav />
+        <CookieBanner />
+        </RationProvider>
+        </MenuProvider>
         </AuthProvider>
       </body>
     </html>

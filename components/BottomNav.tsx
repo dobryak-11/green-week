@@ -2,7 +2,6 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useEffect, useState } from "react";
 import { useAuth } from "@/components/AuthProvider";
 
 const svg = {
@@ -21,33 +20,15 @@ const ICONS: Record<string, React.ReactNode> = {
 export default function BottomNav() {
   const pathname = usePathname();
   const { user } = useAuth();
-  const [active, setActive] = useState("about");
-
-  useEffect(() => {
-    if (pathname !== "/") return;
-    const els = ["about", "packaging", "calc", "menu"]
-      .map((id) => document.getElementById(id))
-      .filter(Boolean) as HTMLElement[];
-    const io = new IntersectionObserver(
-      (entries) => entries.forEach((e) => e.isIntersecting && setActive(e.target.id)),
-      { rootMargin: "-40% 0px -55% 0px" }
-    );
-    els.forEach((el) => io.observe(el));
-    return () => io.disconnect();
-  }, [pathname]);
 
   const items = [
     { k: "home", label: "Главная", href: "/" },
-    { k: "calc", label: "Рацион", href: "/#calc" },
-    { k: "menu", label: "Меню", href: "/#menu" },
+    { k: "calc", label: "Расчёт", href: "/calc" },
+    { k: "menu", label: "Меню", href: "/menu" },
     { k: "faq", label: "Вопросы", href: "/faq" },
     { k: "account", label: user ? "Кабинет" : "Войти", href: "/account" },
   ];
-
-  const on = (k: string) =>
-    k === "faq" ? pathname === "/faq"
-    : k === "account" ? pathname.startsWith("/account")
-    : pathname === "/" && (k === "home" ? active === "about" || active === "packaging" : active === k);
+  const on = (href: string) => (href === "/" ? pathname === "/" : pathname.startsWith(href));
 
   return (
     <nav
@@ -59,13 +40,13 @@ export default function BottomNav() {
           <li key={it.k}>
             <Link
               href={it.href}
-              aria-current={on(it.k) ? "page" : undefined}
+              aria-current={on(it.href) ? "page" : undefined}
               className={
                 "flex min-h-14 flex-col items-center justify-center gap-0.5 text-[11px] font-semibold transition " +
-                (on(it.k) ? "text-orange-300" : "text-white/70")
+                (on(it.href) ? "text-orange-300" : "text-white/70")
               }
             >
-              <span className={"rounded-full px-4 py-1 transition " + (on(it.k) ? "bg-orange-400/20" : "")}>{ICONS[it.k]}</span>
+              <span className={"rounded-full px-4 py-1 transition " + (on(it.href) ? "bg-orange-400/20" : "")}>{ICONS[it.k]}</span>
               {it.label}
             </Link>
           </li>
